@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recover SG Property Scenarios</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1a1a2e; }
+  h1 { font-size: 1.35rem; }
+  .box { background: #f6f5f2; border: 1px solid #e5e2dc; border-radius: 12px; padding: 16px; margin: 16px 0; }
+  .ok { background: #e6f5ee; border-color: #a0d8bc; }
+  .warn { background: #fff6e8; border-color: #e8c98a; }
+  .bad { background: #fdecee; border-color: #f0b4bc; }
+  button { background: #c8102e; color: #fff; border: 0; border-radius: 8px; padding: 10px 16px; font-weight: 600; cursor: pointer; margin: 4px 4px 4px 0; }
+  button.secondary { background: #1a1a2e; }
+  pre { white-space: pre-wrap; word-break: break-word; background: #fff; border-radius: 8px; padding: 12px; font-size: 12px; max-height: 280px; overflow: auto; }
+  code { background: #eee; padding: 1px 5px; border-radius: 4px; }
+  a { color: #1b4b7a; }
+</style>
+</head>
+<body>
+  <h1>Recover SG Property scenarios</h1>
+  <p>Scenarios are stored <strong>per website address</strong>. Data saved while opening a downloaded HTML file lives under <code>file://</code> and does <strong>not</strong> appear on the hosted app automatically.</p>
+
+  <div class="box" id="status">Checking this browser’s storage…</div>
+
+  <div>
+    <button onclick="exportFound()">Download recovery JSON</button>
+    <button class="secondary" onclick="copyFound()">Copy JSON</button>
+  </div>
+
+  <div class="box">
+    <strong>After download</strong>
+    <ol>
+      <li>Open the live app: <a href="https://ngsupeng76.github.io/sg-property-calculator/" target="_blank" rel="noopener">https://ngsupeng76.github.io/sg-property-calculator/</a></li>
+      <li>Tap <strong>⬆ Import</strong></li>
+      <li>Choose the downloaded <code>sg-property-scenarios-recovery.json</code></li>
+    </ol>
+  </div>
+
+  <h2 style="font-size:1.05rem;margin-top:28px">What this page found</h2>
+  <pre id="preview">(nothing yet)</pre>
+
+<script>
+const KEYS = ['sg_prop_scenarios_v1', 'sg_prop_current_v1', 'sg_prop_scenarios', 'sg_prop_current'];
+let payload = null;
+
+function gather() {
+  const scenariosRaw = localStorage.getItem('sg_prop_scenarios_v1') || localStorage.getItem('sg_prop_scenarios');
+  const currentRaw = localStorage.getItem('sg_prop_current_v1') || localStorage.getItem('sg_prop_current');
+  let scenarios = {};
+  let current = null;
+  try { scenarios = scenariosRaw ? JSON.parse(scenariosRaw) : {}; } catch (e) { scenarios = {}; }
+  try { current = currentRaw ? JSON.parse(currentRaw) : null; } catch (e) { current = null; }
+
+  // If only unsaved current state exists, wrap it as a recoverable scenario
+  if ((!scenarios || !Object.keys(scenarios).length) && current && current.data) {
+    scenarios = {
+      sc_recovered_current: {
+        name: 'Recovered unsaved session',
+        data: current.data,
+        savedAt: current.ts || Date.now(),
+        appVersion: 'recovery'
+      }
+    };
+  }
+
+  const count = scenarios && typeof scenarios === 'object' ? Object.keys(scenarios).length : 0;
+  const origin = location.origin || location.protocol;
+  const status = document.getElementById('status');
+  const preview = document.getElementById('preview');
+
+  payload = {
+    format: 'sg-property-calculator-scenarios',
+    version: 1,
+    recoveredAt: new Date().toISOString(),
+    recoveredFrom: location.href,
+    origin,
+    scenarios
+  };
+
+  if (count > 0) {
+    status.className = 'box ok';
+    status.innerHTML = '<strong>Found ' + count + ' scenario(s)</strong> in this browser for <code>' + origin + '</code>. Download the JSON, then Import it on the live app.';
+  } else {
+    status.className = 'box bad';
+    status.innerHTML = '<strong>No scenarios found here.</strong> This page is opened as <code>' + origin + '</code>. ' +
+      'If you originally used the downloaded calculator, open this recovery file the same way (double‑click the HTML in Downloads), or try the browser profile you used before. ' +
+      'If you already Exported a JSON earlier, Import that file on the live app instead.';
+  }
+
+  const names = count ? Object.keys(scenarios).map(id => '- ' + (scenarios[id].name || id)).join('\n') : '(none)';
+  preview.textContent = 'Origin: ' + origin + '\nURL: ' + location.href + '\n\nScenarios:\n' + names + '\n\n' + JSON.stringify(payload, null, 2).slice(0, 4000);
+}
+
+function exportFound() {
+  if (!payload) gather();
+  const n = Object.keys(payload.scenarios || {}).length;
+  if (!n) { alert('Nothing to export from this browser origin.'); return; }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sg-property-scenarios-recovery.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function copyFound() {
+  if (!payload) gather();
+  const n = Object.keys(payload.scenarios || {}).length;
+  if (!n) { alert('Nothing to copy from this browser origin.'); return; }
+  const text = JSON.stringify(payload, null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('JSON copied. On the live app you can paste into a .json file and Import, or use Download instead.');
+  } catch (e) {
+    prompt('Copy this JSON:', text);
+  }
+}
+
+gather();
+</script>
+</body>
+</html>

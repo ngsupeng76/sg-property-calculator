@@ -2788,9 +2788,23 @@ function updateStorageUI() {
   if (banner) {
     if (!durable) {
       banner.classList.add('show');
-      banner.innerHTML = '⚠️ <strong>Saves will not stick</strong> in this open mode (local file / restricted storage). ' +
-        'Open the <strong>hosted web link</strong> (and on iPhone: Share → Add to Home Screen). ' +
-        'Until then: <strong>Export</strong> before leaving, then <strong>Import</strong> later.';
+      let n = 0;
+      try { n = Object.keys(JSON.parse(localStorage.getItem('sg_prop_scenarios_v1') || '{}')).length; } catch (e) {}
+      if (n > 0) {
+        banner.innerHTML = '💾 <strong>Found ' + n + ' saved scenario(s) in this local file.</strong> ' +
+          'They will NOT appear on the hosted app until you move them. ' +
+          '<a href="#" id="migrate-file-export" style="color:#fff;text-decoration:underline;font-weight:700">Export them now</a> ' +
+          'then open <a href="https://ngsupeng76.github.io/sg-property-calculator/" style="color:#fff;font-weight:700">the live app</a> and tap <strong>Import</strong>.';
+        setTimeout(() => {
+          const a = document.getElementById('migrate-file-export');
+          if (a) a.addEventListener('click', (e) => { e.preventDefault(); exportAll(); });
+        }, 0);
+      } else {
+        banner.innerHTML = '⚠️ <strong>Saves will not stick</strong> in this open mode (local file / restricted storage). ' +
+          'Open the <strong>hosted web link</strong> for durable saves. ' +
+          'If you had scenarios here before and they are missing, they may be in another browser, or only on your phone. ' +
+          'Use <strong>Export</strong> whenever you save important work.';
+      }
     } else {
       banner.classList.remove('show');
       banner.innerHTML = '';

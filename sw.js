@@ -1,11 +1,12 @@
 /* SG Property Calculator — offline cache */
-const CACHE = 'sg-prop-calc-v20260814e';
+const CACHE = 'sg-prop-calc-v20260814f';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './recover-scenarios.html'
 ];
 
 self.addEventListener('install', (event) => {
