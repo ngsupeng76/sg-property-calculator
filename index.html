@@ -10,6 +10,7 @@
 <meta name="description" content="Singapore property sell/buy calculator with stamp duty, CPF, loan rules, and saved scenarios.">
 <title>Singapore Property Calculator</title>
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%87%B8%F0%9F%87%AC%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -736,6 +737,29 @@
     margin-top: 4px;
   }
 
+
+  .sc-btn-install {
+    background: #1B4B7A;
+    color: white;
+    border-color: #1B4B7A;
+  }
+  .sc-btn-install:hover { background: #163d64; }
+  .sc-btn-install.installed {
+    background: transparent;
+    color: #7ddea8;
+    border-color: #1B7A4B;
+  }
+  .install-steps { margin: 10px 0 0; padding-left: 1.2em; }
+  .install-steps li { margin: 8px 0; }
+  .install-steps kbd {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: #eee;
+    border: 1px solid #ccc;
+    font-size: 0.85em;
+  }
+
   .storage-banner {
     display: none;
     background: #3b2f14;
@@ -841,7 +865,18 @@
     <button class="sc-btn sc-btn-import" onclick="document.getElementById('import-file').click()">⬆ Import</button>
     <input class="file-input-hidden" id="import-file" type="file" accept="application/json,.json" onchange="importScenarios(event)">
     <button class="sc-btn sc-btn-export" onclick="exportAll()">⬇ Export</button>
-    <span class="install-hint" id="install-hint">Add to Home Screen for app-like use</span>
+    <button class="sc-btn sc-btn-install" id="install-app-btn" type="button" onclick="promptInstallApp()" title="Install or add to Home Screen">⬇ Install app</button>
+  </div>
+</div>
+
+<!-- Install / Add to Home Screen help -->
+<div class="modal-backdrop" id="install-modal">
+  <div class="modal-box" style="max-width:440px">
+    <h3 id="install-modal-title">Add to Home Screen</h3>
+    <div id="install-modal-body" style="font-size:0.9rem;line-height:1.55;color:var(--ink);margin-bottom:14px"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('install-modal')">Close</button>
+    </div>
   </div>
 </div>
 
@@ -2761,10 +2796,7 @@ function updateStorageUI() {
       banner.innerHTML = '';
     }
   }
-  const hint = document.getElementById('install-hint');
-  if (hint && durable && /iPhone|iPad|Macintosh|Android/i.test(navigator.userAgent)) {
-    hint.classList.add('show');
-  }
+  if (typeof refreshInstallButton === 'function') refreshInstallButton();
 }
 
 function captureSnapshot() {
@@ -3190,6 +3222,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeModal('save-modal');
     closeModal('load-modal');
+    closeModal('install-modal');
     const pm = document.getElementById('policy-modal');
     if (pm) pm.classList.remove('open');
   }
@@ -3296,6 +3329,125 @@ function attachSaveListeners() {
   applySellProceedsToBuy();
   refreshBuyFundsTotalHint();
 }
+
+// ── Install / Add to Home Screen ─────────────────────────────────
+let deferredInstallPrompt = null;
+
+function isStandaloneApp() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true
+    || document.referrer.includes('android-app://');
+}
+
+function detectPlatform() {
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(ua);
+  const isSafari = isIOS && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(ua);
+  return { isIOS, isAndroid, isSafari };
+}
+
+function refreshInstallButton() {
+  const btn = document.getElementById('install-app-btn');
+  if (!btn) return;
+  if (isStandaloneApp()) {
+    btn.textContent = '✓ On Home Screen';
+    btn.classList.add('installed');
+    btn.title = 'Already running as an installed app';
+    return;
+  }
+  btn.classList.remove('installed');
+  const p = detectPlatform();
+  if (p.isIOS) btn.textContent = '⬇ Add to Home Screen';
+  else if (deferredInstallPrompt) btn.textContent = '⬇ Install app';
+  else btn.textContent = '⬇ Install / Home Screen';
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  refreshInstallButton();
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  refreshInstallButton();
+  showToast('✓ App installed');
+});
+
+async function promptInstallApp() {
+  if (isStandaloneApp()) {
+    showToast('Already running from Home Screen');
+    return;
+  }
+
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    try {
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') showToast('Installing…');
+    } catch (e) {}
+    deferredInstallPrompt = null;
+    refreshInstallButton();
+    return;
+  }
+
+  const p = detectPlatform();
+  const title = document.getElementById('install-modal-title');
+  const body = document.getElementById('install-modal-body');
+  const url = 'https://ngsupeng76.github.io/sg-property-calculator/';
+
+  if (p.isIOS) {
+    title.textContent = 'Add to iPhone Home Screen';
+    if (!p.isSafari) {
+      body.innerHTML =
+        '<p><strong>Important:</strong> iPhone only allows this from <strong>Safari</strong> ' +
+        '(not Chrome, and not the in-app browser inside Telegram/WhatsApp).</p>' +
+        '<ol class="install-steps">' +
+        '<li>Open this page in <strong>Safari</strong> (tap Share/··· → <strong>Open in Safari</strong>).</li>' +
+        '<li>Go to:<br><code style="word-break:break-all">' + url + '</code></li>' +
+        '<li>Tap the <kbd>Share</kbd> button (square with ↑) at the bottom of Safari.</li>' +
+        '<li>Scroll and tap <strong>Add to Home Screen</strong>.</li>' +
+        '<li>Tap <strong>Add</strong>.</li>' +
+        '</ol>';
+    } else {
+      body.innerHTML =
+        '<p>On iPhone there is <strong>no system install popup</strong> inside the page. Use Safari’s Share menu:</p>' +
+        '<ol class="install-steps">' +
+        '<li>Tap the <kbd>Share</kbd> button at the bottom centre (square with ↑).</li>' +
+        '<li>Scroll the sheet and tap <strong>Add to Home Screen</strong>.</li>' +
+        '<li>Optional: rename to <em>SG Property</em>, then tap <strong>Add</strong> (top right).</li>' +
+        '</ol>' +
+        '<p style="margin-top:12px;font-size:0.82rem;color:var(--ink-muted)">' +
+        'If you don’t see “Add to Home Screen”, scroll further down the share sheet, or tap ' +
+        '<strong>Edit Actions…</strong> to enable it.</p>';
+    }
+  } else if (p.isAndroid) {
+    title.textContent = 'Install on Android';
+    body.innerHTML =
+      '<ol class="install-steps">' +
+      '<li>Tap the browser menu <kbd>⋮</kbd> (top right).</li>' +
+      '<li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>' +
+      '</ol>' +
+      '<p style="margin-top:10px;font-size:0.82rem;color:var(--ink-muted)">Chrome works best. Use the hosted https link (not a downloaded HTML file).</p>';
+  } else {
+    title.textContent = 'Install on this computer';
+    body.innerHTML =
+      '<p>In <strong>Chrome</strong> or <strong>Edge</strong>:</p>' +
+      '<ol class="install-steps">' +
+      '<li>Look for the install icon in the address bar, or</li>' +
+      '<li>Menu <kbd>⋮</kbd> → <strong>Install Singapore Property Calculator…</strong> / ' +
+      '<strong>Apps → Install this site as an app</strong>.</li>' +
+      '</ol>';
+  }
+
+  document.getElementById('install-modal').classList.add('open');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const m = document.getElementById('install-modal');
+  if (m) m.addEventListener('click', function(e) { if (e.target === this) closeModal('install-modal'); });
+  refreshInstallButton();
+});
 
 function showToast(msg) {
   const old = document.getElementById('sc-toast');
