@@ -851,9 +851,11 @@
     <h3 id="modal-title">Save Scenario</h3>
     <p id="modal-desc">Give this set of calculations a name so you can return to it later.</p>
     <input class="modal-input" id="modal-name-input" type="text" placeholder="e.g. Jurong HDB → Tampines Condo" maxlength="60">
-    <div class="modal-btns">
+    <div id="modal-save-hint" style="font-size:0.78rem;color:var(--ink-muted);margin:-4px 0 12px;line-height:1.4"></div>
+    <div class="modal-btns" id="modal-save-btns" style="flex-wrap:wrap">
       <button class="modal-cancel" onclick="closeModal('save-modal')">Cancel</button>
-      <button class="modal-confirm" onclick="confirmSave()">Save</button>
+      <button class="modal-confirm" id="modal-btn-save-new" onclick="confirmSave('new')" style="background:var(--red)">Save as new</button>
+      <button class="modal-confirm" id="modal-btn-update" onclick="confirmSave('update')">Update</button>
     </div>
   </div>
 </div>
@@ -2882,22 +2884,111 @@ function newScenario() {
 function openSaveModal() {
   const scenarios = loadScenarios();
   const existing = activeScenarioId && scenarios[activeScenarioId];
-  document.getElementById('modal-title').textContent = existing ? 'Save / Rename Scenario' : 'Save Scenario';
-  document.getElementById('modal-desc').textContent = existing
-    ? `Currently editing "${existing.name}". Update it or enter a new name to save as a copy.`
-    : 'Give this set of calculations a name so you can return to it later on this device.';
-  document.getElementById('modal-name-input').value = existing ? existing.name : '';
+  const title = document.getElementById('modal-title');
+  const desc = document.getElementById('modal-desc');
+  const hint = document.getElementById('modal-save-hint');
+  const btnUpdate = document.getElementById('modal-btn-update');
+  const btnNew = document.getElementById('modal-btn-save-new');
+  const nameInput = document.getElementById('modal-name-input');
+
+  if (existing) {
+    title.textContent = 'Save scenario';
+    desc.textContent = 'You are editing "' + existing.name + '". Update it in place, or Save as new to keep the original and create a copy with your changes.';
+    nameInput.value = existing.name;
+    if (btnUpdate) {
+      btnUpdate.style.display = '';
+      const short = existing.name.length > 22 ? existing.name.slice(0, 22) + '…' : existing.name;
+      btnUpdate.textContent = 'Update "' + short + '"';
+    }
+    if (btnNew) {
+      btnNew.style.display = '';
+      btnNew.textContent = 'Save as new';
+    }
+    if (hint) {
+      hint.innerHTML = '<strong>Tip:</strong> Change the name below, then click <em>Save as new</em> — the original scenario stays unchanged.';
+    }
+  } else {
+    title.textContent = 'Save scenario';
+    desc.textContent = 'Give this set of calculations a name so you can return to it later on this device.';
+    nameInput.value = '';
+    if (btnUpdate) btnUpdate.style.display = 'none';
+    if (btnNew) {
+      btnNew.style.display = '';
+      btnNew.textContent = 'Save';
+    }
+    if (hint) hint.textContent = '';
+  }
+
   document.getElementById('save-modal').classList.add('open');
-  setTimeout(() => document.getElementById('modal-name-input').focus(), 80);
+  setTimeout(() => {
+    nameInput.focus();
+    if (existing) nameInput.select();
+  }, 80);
 }
 
-function confirmSave() {
-  const name = document.getElementById('modal-name-input').value.trim();
-  if (!name) { document.getElementById('modal-name-input').style.borderColor='#C8102E'; return; }
-  document.getElementById('modal-name-input').style.borderColor='';
+function uniqueScenarioId() {
+  return 'sc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
+function uniqueScenarioName(base, scenarios, ignoreId) {
+  let name = (base || 'Scenario').trim() || 'Scenario';
+  const taken = (n) => Object.keys(scenarios).some(id => id !== ignoreId && scenarios[id].name === n);
+  if (!taken(name)) return name;
+  let i = 2;
+  while (taken(name + ' (' + i + ')')) i++;
+  return name + ' (' + i + ')';
+}
+
+/**
+ * mode:
+ *  - 'update' → overwrite the currently loaded scenario (same id)
+ *  - 'new'    → always create a new scenario id (Save as new / first save)
+ *  - default / undefined → smart: same name on existing → update; else save as new
+ */
+function confirmSave(mode) {
+  let name = document.getElementById('modal-name-input').value.trim();
+  if (!name) {
+    document.getElementById('modal-name-input').style.borderColor = '#C8102E';
+    return;
+  }
+  document.getElementById('modal-name-input').style.borderColor = '';
+
   const scenarios = loadScenarios();
-  const matchId = Object.keys(scenarios).find(id => id !== activeScenarioId && scenarios[id].name === name);
-  const targetId = matchId || activeScenarioId || ('sc_' + Date.now());
+  const existing = activeScenarioId && scenarios[activeScenarioId];
+  let targetId;
+  let actionLabel = 'Saved';
+
+  // Resolve mode
+  if (mode === 'update' && !existing) mode = 'new';
+  if (!mode) {
+    if (!existing) mode = 'new';
+    else if (name === existing.name) mode = 'update';
+    else mode = 'new'; // different name → copy, don't clobber
+  }
+
+  if (mode === 'update') {
+    targetId = activeScenarioId;
+    actionLabel = (name === existing.name) ? 'Updated' : 'Updated & renamed';
+  } else {
+    targetId = uniqueScenarioId();
+    // Avoid silent name collisions when creating a copy
+    const desired = name;
+    name = uniqueScenarioName(name, scenarios, null);
+    actionLabel = (name !== desired) ? 'Saved as new (name adjusted)' : 'Saved as new';
+  }
+
+  // If updating/renaming onto another scenario's exact name, confirm overwrite
+  const collideId = Object.keys(scenarios).find(id => id !== targetId && scenarios[id].name === name);
+  if (collideId) {
+    if (!confirm('A scenario named "' + name + '" already exists. Overwrite it?')) {
+      return;
+    }
+    delete scenarios[collideId];
+    // If we were creating new, write into the collided slot so we don't leave orphans
+    if (mode === 'new') targetId = collideId;
+    actionLabel = 'Overwrote existing';
+  }
+
   scenarios[targetId] = {
     name,
     data: captureSnapshot(),
@@ -2910,8 +3001,9 @@ function confirmSave() {
   closeModal('save-modal');
   renderChips();
   updateStorageUI();
-  showToast(`✓ Saved as "${name}"`);
+  showToast('✓ ' + actionLabel + ': "' + name + '"');
 }
+
 
 function loadScenario(id) {
   const scenarios = loadScenarios();
@@ -2920,7 +3012,7 @@ function loadScenario(id) {
   applySnapshot(scenarios[id].data);
   saveCurrentState();
   renderChips();
-  showToast(`Loaded "${scenarios[id].name}"`);
+  showToast('Loaded "' + scenarios[id].name + '" — edit, then Update or Save as new');
 }
 
 function deleteScenario(e, id) {
