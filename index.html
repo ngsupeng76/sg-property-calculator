@@ -1118,14 +1118,28 @@
       <div class="field">
         <label>CPF-OA Available (S$) <span id="buy-cpf-link-label" style="font-weight:400;text-transform:none;letter-spacing:0;color:#1B7A4B"></span></label>
         <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cpf-avail" placeholder="100000" value="0"></div>
-        <div class="field-linked-note" id="buy-cpf-note" style="display:none">= CPF-OA Returned from sale</div>
+        <div class="field-linked-note" id="buy-cpf-note" style="display:none">= CPF-OA Returned from sale (liquid OA)</div>
+      </div>
+
+      <div class="field">
+        <label>Invested CPF-OA (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cpf-invested" placeholder="0" value="0"></div>
+        <div class="field-linked-note" style="display:block;color:var(--ink-muted)">CPF-OA currently in investments (e.g. CPFIS) you can redeem for this purchase</div>
       </div>
 
       <div class="field">
         <label>Cash Savings Available (S$) <span id="buy-cash-link-label" style="font-weight:400;text-transform:none;letter-spacing:0;color:#1B4B7A"></span></label>
         <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cash-avail" placeholder="200000" value="0"></div>
-        <div class="field-linked-note" id="buy-cash-note" style="display:none;color:#1B4B7A">= Net Cash to You from sale</div>
+        <div class="field-linked-note" id="buy-cash-note" style="display:none;color:#1B4B7A">= Net Cash to You from sale (liquid cash)</div>
       </div>
+
+      <div class="field">
+        <label>Invested Cash Portfolio (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cash-invested" placeholder="0" value="0"></div>
+        <div class="field-linked-note" style="display:block;color:var(--ink-muted)">Brokerage / stocks / funds / other cash investments you can liquidate for this purchase</div>
+      </div>
+
+      <div class="hint" id="buy-funds-total-hint" style="margin-top:4px">Total CPF usable: S$0 · Total cash usable: S$0</div>
 
       <button class="calc-btn" onclick="calcBuy()">Calculate Total Costs →</button>
     </div>
@@ -1951,6 +1965,8 @@ function applySellProceedsToBuy(opts) {
   cashInput.value = cash;
   _applyingSellLink = false;
 
+  if (typeof refreshBuyFundsTotalHint === 'function') refreshBuyFundsTotalHint();
+
   if (cpfChanged || cashChanged || opts.fromCalc) {
     if (typeof saveCurrentState === 'function') saveCurrentState();
     const buyResult = document.getElementById('result-buy');
@@ -2179,6 +2195,31 @@ function calcMaxLoan(income, existingDebt, rate, tenure) {
 }
 
 // ─── BUY CALCULATION ──────────────────────────────────────────────
+function getBuyFundsAvailable() {
+  const cpfLiquid = parseFloat(document.getElementById('buy-cpf-avail')?.value) || 0;
+  const cashLiquid = parseFloat(document.getElementById('buy-cash-avail')?.value) || 0;
+  const cpfInvested = parseFloat(document.getElementById('buy-cpf-invested')?.value) || 0;
+  const cashInvested = parseFloat(document.getElementById('buy-cash-invested')?.value) || 0;
+  return {
+    cpfLiquid,
+    cashLiquid,
+    cpfInvested: Math.max(0, cpfInvested),
+    cashInvested: Math.max(0, cashInvested),
+    cpfTotal: Math.max(0, cpfLiquid) + Math.max(0, cpfInvested),
+    cashTotal: Math.max(0, cashLiquid) + Math.max(0, cashInvested),
+  };
+}
+
+function refreshBuyFundsTotalHint() {
+  const el = document.getElementById('buy-funds-total-hint');
+  if (!el || typeof fmt !== 'function') return;
+  const f = getBuyFundsAvailable();
+  el.innerHTML = 'Total <strong>CPF usable</strong>: ' + fmt(f.cpfTotal) +
+    ' <span style="opacity:.7">(' + fmt(f.cpfLiquid) + ' liquid + ' + fmt(f.cpfInvested) + ' invested)</span>' +
+    ' · Total <strong>cash usable</strong>: ' + fmt(f.cashTotal) +
+    ' <span style="opacity:.7">(' + fmt(f.cashLiquid) + ' liquid + ' + fmt(f.cashInvested) + ' invested)</span>';
+}
+
 function calcBuy() {
   const price       = parseFloat(document.getElementById('buy-price').value) || 0;
   const citizenship = document.getElementById('buy-citizenship').value;
@@ -2196,8 +2237,13 @@ function calcBuy() {
   const legal       = parseFloat(document.getElementById('buy-legal').value) || 0;
   const insurance   = parseFloat(document.getElementById('buy-insurance').value) || 0;
   const reno        = parseFloat(document.getElementById('buy-reno').value) || 0;
-  const cpfAvail    = parseFloat(document.getElementById('buy-cpf-avail').value) || 0;
-  const cashAvail   = parseFloat(document.getElementById('buy-cash-avail').value) || 0;
+  const funds = getBuyFundsAvailable();
+  const cpfAvail    = funds.cpfTotal;
+  const cashAvail   = funds.cashTotal;
+  const cpfLiquid   = funds.cpfLiquid;
+  const cashLiquid  = funds.cashLiquid;
+  const cpfInvested = funds.cpfInvested;
+  const cashInvested = funds.cashInvested;
 
   if (!price) { alert('Please enter the purchase price.'); return; }
 
@@ -2337,13 +2383,19 @@ function calcBuy() {
 
     ${absd > 0 ? `<div class="absd-warning">⚠️ <strong>ABSD of ${fmt(absd)} (${absdRate.toFixed(2)}%)</strong> must be paid in <strong>cash within 14 days</strong> of signing S&amp;P Agreement. You may apply for CPF reimbursement afterwards. SC married couples may apply for ABSD remission — consult your lawyer.</div>` : ''}
 
-    ${hasInputFunds && cashShortfall > 0 ? `<div class="shortfall-box">⚠️ <strong>Cash shortfall of ${fmt(cashShortfall)}.</strong> Your available cash (${fmt(cashAvail)}) is insufficient. You need an additional ${fmt(cashShortfall)} in cash to proceed.</div>` : ''}
-    ${hasInputFunds && cpfShortfall > 0 ? `<div class="shortfall-box">⚠️ <strong>CPF-OA shortfall of ${fmt(cpfShortfall)}.</strong> Not enough CPF-OA to cover CPF-eligible items. The ${fmt(cpfShortfall)} gap must be covered by additional cash.</div>` : ''}
+    ${hasInputFunds && cashShortfall > 0 ? `<div class="shortfall-box">⚠️ <strong>Cash shortfall of ${fmt(cashShortfall)}.</strong> Your total usable cash (${fmt(cashAvail)} = liquid ${fmt(cashLiquid)} + invested ${fmt(cashInvested)}) is insufficient. You need an additional ${fmt(cashShortfall)} in cash to proceed.</div>` : ''}
+    ${hasInputFunds && cpfShortfall > 0 ? `<div class="shortfall-box">⚠️ <strong>CPF-OA shortfall of ${fmt(cpfShortfall)}.</strong> Total usable CPF-OA (${fmt(cpfAvail)} = liquid ${fmt(cpfLiquid)} + invested ${fmt(cpfInvested)}) is not enough for CPF-eligible items. The ${fmt(cpfShortfall)} gap must be covered by additional cash.</div>` : ''}
     ${hasInputFunds && cashShortfall === 0 && cpfShortfall === 0 ? `<div class="surplus-box">✅ <strong>You have sufficient funds.</strong> Cash surplus: ${fmt(cashSurplus)} | CPF-OA surplus: ${fmt(cpfSurplus)}. You are well-positioned to proceed.</div>` : ''}
 
     ${hasInputFunds ? `
     <div class="breakdown-section">
-      <div class="breakdown-head">📊 Funds Utilisation</div>
+      <div class="breakdown-head">📊 Funds Stack (liquid + invested)</div>
+      <div style="padding:12px 18px 4px;font-size:0.82rem;color:var(--ink-muted)">
+        <div>🏦 CPF-OA total usable <strong style="color:var(--ink)">${fmt(cpfAvail)}</strong> = liquid ${fmt(cpfLiquid)} + invested ${fmt(cpfInvested)}</div>
+        <div style="margin-top:4px">💵 Cash total usable <strong style="color:var(--ink)">${fmt(cashAvail)}</strong> = liquid ${fmt(cashLiquid)} + invested portfolio ${fmt(cashInvested)}</div>
+        <div style="margin-top:6px;font-size:0.75rem">Assumes invested CPF-OA / cash portfolio can be liquidated in time for completion. Transaction costs, lock-ups, and market risk are not modelled.</div>
+      </div>
+      <div class="breakdown-head" style="border-top:1px solid var(--border)">📊 Funds Utilisation</div>
       <div style="padding:14px 18px">
         <div class="fund-bar-wrap">
           <div class="fund-bar-label">
@@ -3115,7 +3167,7 @@ function attachSaveListeners() {
   });
   document.querySelectorAll('input[name="sell-years"]').forEach(r => r.addEventListener('change', onSellChange));
 
-  // Manual edit of buy funds while linked → auto-unlink
+  // Manual edit of liquid buy funds while linked → auto-unlink
   ['buy-cpf-avail','buy-cash-avail'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -3128,11 +3180,29 @@ function attachSaveListeners() {
         showToast('Unlinked — manual CPF/cash edit');
         saveCurrentState();
       }
+      refreshBuyFundsTotalHint();
     });
+  });
+
+  // Invested funds always editable; update totals + live buy results
+  ['buy-cpf-invested','buy-cash-invested'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const onInv = () => {
+      refreshBuyFundsTotalHint();
+      saveCurrentState();
+      const buyResult = document.getElementById('result-buy');
+      if (buyResult && buyResult.innerHTML.trim() && !buyResult.classList.contains('hidden')) {
+        try { calcBuy(); } catch (e) {}
+      }
+    };
+    el.addEventListener('input', onInv);
+    el.addEventListener('change', onInv);
   });
 
   formatSellLinkMeta();
   applySellProceedsToBuy();
+  refreshBuyFundsTotalHint();
 }
 
 function showToast(msg) {
