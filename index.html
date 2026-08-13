@@ -1,0 +1,2966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A1A2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SG Property">
+<meta name="description" content="Singapore property sell/buy calculator with stamp duty, CPF, loan rules, and saved scenarios.">
+<title>Singapore Property Calculator</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%87%B8%F0%9F%87%AC%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E;
+    --red-light: #f5e6e9;
+    --white: #FAF9F7;
+    --ink: #1A1A2E;
+    --ink-muted: #6B6B7B;
+    --gold: #B8860B;
+    --gold-light: #fdf6e3;
+    --surface: #FFFFFF;
+    --border: #E8E5E0;
+    --success: #1B7A4B;
+    --success-light: #E6F5EE;
+    --warn: #C8102E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    color: white;
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .flag { font-size: 2rem; }
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: white;
+    line-height: 1.1;
+  }
+  .header-text p {
+    font-size: 0.78rem;
+    color: #9999BB;
+    margin-top: 4px;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge {
+    margin-left: auto;
+    background: var(--red);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* TABS */
+  .tabs-bar {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    padding: 0 40px;
+  }
+  .tab-btn {
+    padding: 16px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active {
+    color: var(--red);
+    border-bottom-color: var(--red);
+  }
+  .tab-indicator { font-size: 0.75rem; margin-left: 6px; opacity: 0.7; }
+
+  /* LAYOUT */
+  .app-body { display: flex; min-height: calc(100vh - 130px); }
+
+  .panel {
+    padding: 32px 40px;
+    width: 420px;
+    min-width: 420px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    background: var(--surface);
+  }
+
+  .results-area {
+    flex: 1;
+    padding: 32px 40px;
+    background: var(--white);
+    overflow-y: auto;
+  }
+
+  /* TAB CONTENT */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* FORM ELEMENTS */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title span { font-size: 1.1em; }
+
+  .field {
+    margin-bottom: 18px;
+  }
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  input[type="number"], select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--white);
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--red);
+  }
+  .prefix-wrap { position: relative; }
+  .prefix-wrap span {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .prefix-wrap input { padding-left: 28px; }
+
+  .radio-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .radio-chip {
+    padding: 7px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: var(--ink-muted);
+    user-select: none;
+  }
+  .radio-chip input { display: none; }
+  .radio-chip:has(input:checked) {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .toggle-label { font-size: 0.85rem; font-weight: 500; }
+  .toggle {
+    position: relative;
+    width: 42px;
+    height: 24px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    transition: 0.2s;
+    cursor: pointer;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked ~ .toggle-slider { background: var(--red); }
+  .toggle input:checked ~ .toggle-slider::before { transform: translateX(18px); }
+
+  /* HINT */
+  .hint {
+    background: var(--gold-light);
+    border-left: 3px solid var(--gold);
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.78rem;
+    color: #5a4500;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* CALCULATE BUTTON */
+  .calc-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+  }
+  .calc-btn:hover { background: var(--red); transform: translateY(-1px); }
+  .calc-btn:active { transform: none; }
+
+  /* RESULTS */
+  .result-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+    color: var(--ink-muted);
+    text-align: center;
+    gap: 12px;
+  }
+  .result-placeholder .big-icon { font-size: 3.5rem; opacity: 0.3; }
+  .result-placeholder p { font-size: 0.9rem; max-width: 260px; line-height: 1.6; }
+
+  .results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .results-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+  }
+  .results-subtitle { font-size: 0.8rem; color: var(--ink-muted); margin-top: 2px; }
+
+  /* SUMMARY CARDS */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .sum-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .sum-card.highlight {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+  .sum-card.warn { background: var(--red-light); border-color: #e8c0c8; }
+  .sum-card.good { background: var(--success-light); border-color: #b0dbc4; }
+  .sum-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 4px;
+  }
+  .sum-card.highlight .sum-label { opacity: 0.75; }
+  .sum-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    line-height: 1.1;
+  }
+  .sum-note { font-size: 0.72rem; opacity: 0.6; margin-top: 2px; }
+
+  /* BREAKDOWN TABLE */
+  .breakdown-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .breakdown-head {
+    background: #F5F4F2;
+    padding: 12px 18px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 18px;
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .breakdown-row:first-child { border-top: none; }
+  .row-label { color: var(--ink-muted); }
+  .row-value { font-weight: 600; }
+  .row-value.deduct { color: var(--red); }
+  .row-value.zero { color: var(--ink-muted); font-weight: 400; }
+  .breakdown-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 13px 18px;
+    border-top: 2px solid var(--ink);
+    background: #F5F4F2;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .note-row {
+    padding: 8px 18px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    background: #FAFAFA;
+    line-height: 1.5;
+  }
+
+  /* ABSD WARNING */
+  .absd-warning {
+    background: #FFF3E0;
+    border: 1.5px solid #FFB74D;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 0.83rem;
+    color: #6D3B00;
+    line-height: 1.6;
+  }
+  .absd-warning strong { color: #C8102E; }
+
+  /* NET PROCEEDS highlight */
+  .net-highlight {
+    background: var(--ink);
+    color: white;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .net-highlight .label { font-size: 0.85rem; opacity: 0.7; }
+  .net-highlight .amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+  }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    font-size: 0.73rem;
+    color: var(--ink-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  .hidden { display: none !important; }
+
+  /* COMBINED VIEW */
+  .combined-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .combined-col h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* CASH / CPF SPLIT TABLE */
+  .split-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  .split-table thead tr { background: #F5F4F2; }
+  .split-table th {
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .split-table th.cash-col { color: #1B4B7A; }
+  .split-table th.cpf-col  { color: #1B7A4B; }
+  .split-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .split-table tr:last-child td { border-bottom: none; }
+  .split-table .item-name { color: var(--ink-muted); }
+  .split-table .cash-val { color: #1B4B7A; font-weight: 600; }
+  .split-table .cpf-val  { color: #1B7A4B; font-weight: 600; }
+  .split-table .total-row td { font-weight: 700; background: #F5F4F2; border-top: 2px solid var(--ink); border-bottom: none; }
+  .split-table .total-row .cash-val { color: #1B4B7A; }
+  .split-table .total-row .cpf-val  { color: #1B7A4B; }
+  .split-table .zero-val { color: #BBBBBB; font-weight: 400; }
+  .split-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .tag-cash { background: #DDEEFF; color: #1B4B7A; }
+  .tag-cpf  { background: #D6F0E3; color: #1B7A4B; }
+  .tag-both { background: #F0E6FF; color: #5B1B7A; }
+  .fund-bar-wrap { margin: 18px 0; }
+  .fund-bar-label { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 5px; }
+  .fund-bar { height: 14px; border-radius: 7px; background: var(--border); overflow: hidden; display: flex; }
+  .fund-bar-cash { background: #1B4B7A; height: 100%; transition: width 0.4s; }
+  .fund-bar-cpf  { background: #1B7A4B; height: 100%; transition: width 0.4s; }
+  .fund-bar-short { background: #C8102E; height: 100%; transition: width 0.4s; }
+  .fund-legend { display: flex; gap: 14px; margin-top: 7px; font-size: 0.75rem; }
+  .fund-legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .shortfall-box {
+    background: #FFF0F2;
+    border: 1.5px solid #F5A0B0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.83rem;
+    color: #7A0020;
+    margin-bottom: 16px;
+  }
+  .surplus-box {
+    background: var(--success-light);
+    border: 1.5px solid #A0D8BC;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.83rem;
+    color: #0D4D30;
+    margin-bottom: 16px;
+  }
+
+  /* ── SCENARIO MANAGER ── */
+  .scenario-bar {
+    background: #13132A;
+    padding: 10px 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #2a2a44;
+  }
+  .scenario-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7777AA;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+  .scenario-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .scenario-chip {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #22224A;
+    border: 1.5px solid #33336A;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: #AAAACC;
+    overflow: hidden;
+    cursor: default;
+    transition: border-color 0.15s;
+  }
+  .scenario-chip.active {
+    border-color: #C8102E;
+    background: #2A1020;
+    color: white;
+  }
+  .chip-name {
+    padding: 5px 12px 5px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chip-name:hover { color: white; }
+  .chip-del {
+    padding: 5px 9px 5px 2px;
+    cursor: pointer;
+    color: #666688;
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+  .chip-del:hover { color: #FF6680; }
+  .scenario-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
+  }
+  .sc-btn {
+    padding: 6px 13px;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sc-btn-save {
+    background: var(--red);
+    color: white;
+    border-color: var(--red);
+  }
+  .sc-btn-save:hover { background: #a00020; }
+  .sc-btn-new {
+    background: transparent;
+    color: #AAAACC;
+    border-color: #33336A;
+  }
+  .sc-btn-new:hover { color: white; border-color: #AAAACC; }
+  .sc-btn-export {
+    background: transparent;
+    color: #7777AA;
+    border-color: #22224A;
+    font-size: 0.73rem;
+  }
+  .sc-btn-export:hover { color: #AAAACC; border-color: #33336A; }
+  .active-name-display {
+    font-size: 0.78rem;
+    color: #7777AA;
+    font-style: italic;
+  }
+  .active-name-display strong { color: #CCCCEE; font-style: normal; }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 28px 30px;
+    width: 380px;
+    max-width: 92vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .modal-box h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+  .modal-box p { font-size: 0.83rem; color: var(--ink-muted); margin-bottom: 16px; }
+  .modal-input {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  .modal-input:focus { outline: none; border-color: var(--red); }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-cancel {
+    padding: 9px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    color: var(--ink-muted);
+  }
+  .modal-confirm {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--ink);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal-confirm:hover { background: var(--red); }
+  .scenario-list-modal { max-height: 220px; overflow-y: auto; margin-bottom: 14px; }
+  .scenario-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    margin-bottom: 7px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .scenario-list-item:hover { border-color: var(--red); background: var(--red-light); }
+  .scenario-list-item .sc-meta { font-size: 0.73rem; color: var(--ink-muted); }
+  .no-scenarios { text-align: center; color: var(--ink-muted); font-size: 0.85rem; padding: 20px 0; }
+
+  @media (max-width: 900px) {
+    .scenario-bar { padding: 10px 16px; }
+  }
+
+
+  .storage-banner {
+    display: none;
+    background: #3b2f14;
+    color: #f6e7b2;
+    padding: 10px 40px;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #6a5420;
+  }
+  .storage-banner a { color: #fff; font-weight: 600; }
+  .storage-banner.show { display: block; }
+  .storage-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #33336A;
+    color: #9999CC;
+    white-space: nowrap;
+  }
+  .storage-pill.ok { border-color: #1B7A4B; color: #7ddea8; background: #10261a; }
+  .storage-pill.warn { border-color: #B8860B; color: #f0d48a; background: #2a220c; }
+  .sc-btn-import { background: transparent; color: #AAAACC; border-color: #33336A; }
+  .sc-btn-import:hover { color: white; border-color: #AAAACC; }
+  .sc-btn-share { background: transparent; color: #AACCFF; border-color: #33557A; }
+  .sc-btn-share:hover { color: white; border-color: #88AAEE; }
+  .file-input-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .install-hint {
+    display: none;
+    margin-left: 8px;
+    font-size: 0.72rem;
+    color: #8888AA;
+  }
+  .install-hint.show { display: inline; }
+  @media (max-width: 900px) {
+    .header { flex-wrap: wrap; gap: 12px; padding: 16px 18px; }
+    .header .badge, #policy-badge { margin-left: 0; }
+    .header-text h1 { font-size: 1.25rem; }
+    .scenario-bar { padding: 10px 14px; gap: 8px; }
+    .scenario-actions { width: 100%; margin-left: 0; flex-wrap: wrap; }
+    .tabs-bar { padding: 0 12px; }
+    .tab-btn { padding: 14px 16px; font-size: 0.82rem; flex-shrink: 0; }
+    .panel, .results-area { padding: 18px 16px; }
+    .storage-banner { padding: 10px 16px; }
+    .chip-name { max-width: 110px; }
+  }
+  @supports (padding: max(0px)) {
+    body { padding-bottom: env(safe-area-inset-bottom); }
+  }
+
+  @media (max-width: 900px) {
+    .app-body { flex-direction: column; }
+    .panel { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); }
+    .tabs-bar { padding: 0 20px; overflow-x: auto; }
+    .panel, .results-area { padding: 24px 20px; }
+    .combined-grid { grid-template-columns: 1fr; }
+    .header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="storage-banner" id="storage-banner"></div>
+
+<div class="header">
+  <div class="flag">🇸🇬</div>
+  <div class="header-text">
+    <h1>Singapore Property Calculator</h1>
+    <p>Sell · Buy · Combined — All Fees &amp; Duties Included</p>
+  </div>
+  <div class="badge">2025 / 2026 Rates</div>
+  <div id="policy-badge" onclick="document.getElementById('policy-modal').classList.add('open')" title="Click to view policy status" style="margin-left:10px;padding:5px 12px;border-radius:20px;font-size:0.7rem;font-weight:600;cursor:pointer;transition:opacity 0.2s;letter-spacing:0.06em;text-transform:uppercase;background:#22224A;color:#9999CC">🔄 Checking…</div>
+</div>
+
+<!-- Policy Update Modal -->
+<div class="modal-backdrop" id="policy-modal">
+  <div class="modal-box" style="width:480px;max-width:96vw;max-height:80vh;overflow-y:auto">
+    <h3 style="display:flex;align-items:center;justify-content:space-between">
+      Policy Status
+      <span id="policy-modal-version" style="font-size:0.75rem;font-weight:400;color:var(--ink-muted)"></span>
+    </h3>
+    <p>Automatic verification of Singapore property regulations via remote config and AI analysis.</p>
+    <div id="policy-modal-content" style="margin-bottom:14px">
+      <div style="text-align:center;padding:24px;color:var(--ink-muted);font-size:0.85rem">Checking policy status…</div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('policy-modal')">Close</button>
+      <button class="modal-confirm" onclick="closeModal('policy-modal');initPolicy()">🔄 Re-check Now</button>
+    </div>
+  </div>
+</div>
+
+<div class="scenario-bar">
+  <span class="scenario-label">📁 Scenarios</span>
+  <div class="scenario-chips" id="scenario-chips"></div>
+  <div class="scenario-actions">
+    <span class="storage-pill" id="storage-pill" title="Where your scenarios are stored">…</span>
+    <span class="active-name-display" id="active-name-display"></span>
+    <button class="sc-btn sc-btn-new" onclick="newScenario()">+ New</button>
+    <button class="sc-btn sc-btn-save" onclick="openSaveModal()">💾 Save</button>
+    <button class="sc-btn sc-btn-share" onclick="shareActiveScenario()" title="Copy a link that opens this scenario on any device">↗ Share</button>
+    <button class="sc-btn sc-btn-import" onclick="document.getElementById('import-file').click()">⬆ Import</button>
+    <input class="file-input-hidden" id="import-file" type="file" accept="application/json,.json" onchange="importScenarios(event)">
+    <button class="sc-btn sc-btn-export" onclick="exportAll()">⬇ Export</button>
+    <span class="install-hint" id="install-hint">Add to Home Screen for app-like use</span>
+  </div>
+</div>
+
+<!-- Save / Rename Modal -->
+<div class="modal-backdrop" id="save-modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Save Scenario</h3>
+    <p id="modal-desc">Give this set of calculations a name so you can return to it later.</p>
+    <input class="modal-input" id="modal-name-input" type="text" placeholder="e.g. Jurong HDB → Tampines Condo" maxlength="60">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('save-modal')">Cancel</button>
+      <button class="modal-confirm" onclick="confirmSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Load Scenarios Modal -->
+<div class="modal-backdrop" id="load-modal">
+  <div class="modal-box">
+    <h3>Saved Scenarios</h3>
+    <p>Click a scenario to load it. All current unsaved values will be replaced.</p>
+    <div class="scenario-list-modal" id="scenario-list-modal"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('load-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('sell')">🏠 Selling <span class="tab-indicator">Proceeds</span></button>
+  <button class="tab-btn" onclick="switchTab('buy')">🔑 Buying <span class="tab-indicator">Costs</span></button>
+  <button class="tab-btn" onclick="switchTab('combined')">⇄ Sell &amp; Buy <span class="tab-indicator">Full Picture</span></button>
+</div>
+
+<div class="app-body">
+  <!-- LEFT PANEL -->
+  <div class="panel">
+
+    <!-- ====== SELL TAB ====== -->
+    <div class="tab-content active" id="panel-sell">
+      <div class="section-title"><span>🏡</span> Your Current Property</div>
+
+      <div class="field">
+        <label>Property Type</label>
+        <div class="radio-group">
+          <label class="radio-chip"><input type="radio" name="sell-type" value="hdb" checked> HDB Flat</label>
+          <label class="radio-chip"><input type="radio" name="sell-type" value="private"> Private / Condo</label>
+          <label class="radio-chip"><input type="radio" name="sell-type" value="landed"> Landed</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Expected Selling Price (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-price" placeholder="800,000" value=""></div>
+      </div>
+
+      <div class="field">
+        <label>Outstanding Home Loan (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-loan" placeholder="0" value="0"></div>
+      </div>
+
+      <div class="field">
+        <label>CPF Used (Principal + Accrued Interest) (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf" placeholder="0" value="0"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px"><span>📋</span> Seller's Stamp Duty (SSD)</div>
+      <div class="hint">SSD applies if you sell within the holding period. For properties <strong>purchased before 4 Jul 2025</strong>: 3-year holding period. For purchases <strong>on/after 4 Jul 2025</strong>: 4-year holding period. HDB sellers are exempt from SSD.</div>
+
+      <div class="field">
+        <label>Property Purchased On / After</label>
+        <select id="sell-ssd-era">
+          <option value="post2025">4 Jul 2025 or later (4-year SSD)</option>
+          <option value="pre2025" selected>Before 4 Jul 2025 (3-year SSD)</option>
+          <option value="hdb">HDB (SSD exempt)</option>
+        </select>
+      </div>
+
+      <div class="field" id="ssd-year-field">
+        <label>Years Held (at time of sale)</label>
+        <div class="radio-group">
+          <label class="radio-chip"><input type="radio" name="sell-years" value="0"> &lt;1 yr</label>
+          <label class="radio-chip"><input type="radio" name="sell-years" value="1"> 1–2 yrs</label>
+          <label class="radio-chip"><input type="radio" name="sell-years" value="2" checked> 2–3 yrs</label>
+          <label class="radio-chip"><input type="radio" name="sell-years" value="3"> 3–4 yrs</label>
+          <label class="radio-chip"><input type="radio" name="sell-years" value="4"> 4+ yrs</label>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px"><span>💼</span> Agent &amp; Legal Costs</div>
+
+      <div class="field">
+        <label>Agent Commission Rate (%)</label>
+        <input type="number" id="sell-commission" placeholder="2" value="2" step="0.1" min="0" max="5">
+      </div>
+      <div class="hint" style="margin-top:-8px">HDB typically 1–2%. Private typically 2–4%. Buyer's agent (if you pay): additional 0.5–1%.</div>
+
+      <div class="field">
+        <label>Legal / Conveyancing Fees (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-legal" placeholder="2500" value="2500"></div>
+      </div>
+
+      <div class="field">
+        <label>Mortgage Redemption Admin Fee (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-redemption" placeholder="300" value="300"></div>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">Bank Lock-in Penalty (≈1.5% outstanding loan)</span>
+        <label class="toggle"><input type="checkbox" id="sell-lockin"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">HDB Resale Levy (if applicable)</span>
+        <label class="toggle"><input type="checkbox" id="sell-levy"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="field" id="levy-field" style="display:none">
+        <label>Resale Levy Amount (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-levy-amt" placeholder="40000" value="40000"></div>
+      </div>
+
+      <div class="field">
+        <label>Property Tax / MCST Proration (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-misc" placeholder="1500" value="1500"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px"><span>💰</span> Your Proceeds Split</div>
+      <div class="hint">Your CPF used (principal + accrued interest) is returned to <strong>CPF-OA</strong> — not receivable as cash. Fees paid from sale proceeds (commission, legal, SSD etc.) are deducted from the <strong>cash</strong> portion. The calculator will show your net cash-in-hand and net CPF-OA returned.</div>
+
+      <button class="calc-btn" onclick="calcSell()">Calculate Net Proceeds →</button>
+    </div>
+
+    <!-- ====== BUY TAB ====== -->
+    <div class="tab-content" id="panel-buy">
+      <div class="section-title"><span>🔑</span> New Property Details</div>
+
+      <div class="field">
+        <label>Property Type</label>
+        <div class="radio-group">
+          <label class="radio-chip"><input type="radio" name="buy-type" value="hdb" checked> HDB</label>
+          <label class="radio-chip"><input type="radio" name="buy-type" value="private"> Private / Condo</label>
+          <label class="radio-chip"><input type="radio" name="buy-type" value="landed"> Landed</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Purchase Price (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-price" placeholder="1200000" value=""></div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px"><span>👤</span> Buyer Profile</div>
+
+      <div class="field">
+        <label>Citizenship Status</label>
+        <select id="buy-citizenship">
+          <option value="sc">Singapore Citizen (SC)</option>
+          <option value="pr">Permanent Resident (PR)</option>
+          <option value="foreigner">Foreigner</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Number of Properties Owned (after selling current)</label>
+        <div class="radio-group">
+          <label class="radio-chip"><input type="radio" name="buy-props" value="0" checked> 0 (this is 1st)</label>
+          <label class="radio-chip"><input type="radio" name="buy-props" value="1"> 1 (this is 2nd)</label>
+          <label class="radio-chip"><input type="radio" name="buy-props" value="2"> 2 (this is 3rd+)</label>
+        </div>
+      </div>
+
+      <div class="hint">For married SC couples upgrading: you may pay ABSD upfront and apply for refund within 6 months of selling your current property (conditions apply).</div>
+
+      <div class="section-title" style="margin-top:22px"><span>🏦</span> Financing &amp; Loan Eligibility</div>
+
+      <div class="field">
+        <label>Loan Type</label>
+        <div class="radio-group">
+          <label class="radio-chip"><input type="radio" name="loan-type" value="bank" checked onchange="updateLoanRules()"> Bank Loan</label>
+          <label class="radio-chip"><input type="radio" name="loan-type" value="hdb" onchange="updateLoanRules()"> HDB Concessionary Loan</label>
+          <label class="radio-chip"><input type="radio" name="loan-type" value="none" onchange="updateLoanRules()"> No Loan (Cash / CPF)</label>
+        </div>
+      </div>
+
+      <!-- Rate reference card — updates dynamically -->
+      <div id="rate-guide" style="background:#F5F4F2;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:14px;font-size:0.8rem;line-height:1.7">
+        <div style="font-weight:700;margin-bottom:4px;font-size:0.78rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-muted)">📊 Prevailing Rates — April 2026</div>
+        <div id="rate-guide-content"></div>
+        <div style="margin-top:6px;font-size:0.72rem;color:var(--ink-muted)">Sources: MAS, HDB.gov.sg, MortgageWise, PropertyNet.sg. Rates change daily — verify with your bank before committing.</div>
+      </div>
+
+      <div id="loan-fields">
+        <div class="field">
+          <label>Loan Amount (S$)</label>
+          <div class="prefix-wrap"><span>$</span><input type="number" id="buy-loan" placeholder="600000" value="0"></div>
+        </div>
+
+        <div class="field">
+          <label>Borrower's Age (Youngest Borrower)</label>
+          <input type="number" id="buy-age" placeholder="35" min="21" max="75" value="">
+        </div>
+
+        <div class="field">
+          <label>Desired Loan Tenure (Years)</label>
+          <input type="number" id="buy-tenure" placeholder="25" min="1" max="35" value="" oninput="checkTenure()">
+          <div id="tenure-warning" style="margin-top:6px;font-size:0.78rem;color:#C8102E;display:none"></div>
+          <div id="tenure-info" style="margin-top:6px;font-size:0.78rem;color:#1B7A4B;display:none"></div>
+        </div>
+
+        <div class="field">
+          <label>Remaining Lease of Property (Years) <span style="font-weight:400;color:var(--ink-muted)">(for leasehold)</span></label>
+          <input type="number" id="buy-lease" placeholder="99" min="1" max="99" value="99">
+          <div id="lease-warning" style="margin-top:6px;font-size:0.78rem;color:#C8102E;display:none"></div>
+        </div>
+
+        <div class="field">
+          <label>Gross Monthly Income — all borrowers (S$)</label>
+          <div class="prefix-wrap"><span>$</span><input type="number" id="buy-income" placeholder="10000" value="" oninput="refreshAffordability()"></div>
+        </div>
+
+        <div class="field">
+          <label>Existing Monthly Debt Obligations (S$)</label>
+          <div class="prefix-wrap"><span>$</span><input type="number" id="buy-debt" placeholder="0" value="0" oninput="refreshAffordability()"></div>
+        </div>
+
+        <div class="field">
+          <label>Interest Rate (% p.a.) <span id="rate-type-label" style="font-weight:400;color:var(--ink-muted);font-size:0.78rem"></span></label>
+          <input type="number" id="buy-rate" placeholder="1.5" value="1.5" step="0.05" min="0.5" max="10" oninput="refreshAffordability()">
+          <div id="rate-hint" style="margin-top:5px;font-size:0.76rem;color:var(--ink-muted)"></div>
+        </div>
+
+        <div id="affordability-result" style="display:none"></div>
+      </div>
+
+      <div class="field">
+        <label>Valuation / Appraisal Fee (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-valuation" placeholder="500" value="500"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px"><span>💼</span> Agent &amp; Legal Costs</div>
+
+      <div class="field">
+        <label>Buyer's Agent Commission (%)</label>
+        <input type="number" id="buy-commission" placeholder="1" value="1" step="0.1" min="0" max="3">
+      </div>
+      <div class="hint" style="margin-top:-8px">HDB: typically 1%. Private: often 0 (co-broking) or 0.5–1% under new SEAA guidelines. Set to 0 if seller pays all.</div>
+
+      <div class="field">
+        <label>Legal / Conveyancing Fees (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-legal" placeholder="3000" value="3000"></div>
+      </div>
+
+      <div class="field">
+        <label>Home Insurance (Estimate) (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-insurance" placeholder="500" value="500"></div>
+      </div>
+
+      <div class="field">
+        <label>Renovation Budget (S$) — for reference</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-reno" placeholder="0" value="0"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:22px"><span>💰</span> Your CPF &amp; Cash Available</div>
+      <div class="hint">Enter how much you have available in CPF-OA and cash savings. The calculator will split every cost item into what must be cash vs what can use CPF-OA.</div>
+
+      <div class="field">
+        <label>CPF-OA Available (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cpf-avail" placeholder="100000" value="0"></div>
+      </div>
+
+      <div class="field">
+        <label>Cash Savings Available (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cash-avail" placeholder="200000" value="0"></div>
+      </div>
+
+      <button class="calc-btn" onclick="calcBuy()">Calculate Total Costs →</button>
+    </div>
+
+    <!-- ====== COMBINED TAB ====== -->
+    <div class="tab-content" id="panel-combined">
+      <div class="hint">Fill in both the <strong>Selling</strong> and <strong>Buying</strong> tabs first, then click below to see your complete financial picture.</div>
+
+      <div class="section-title"><span>⇄</span> Sequence &amp; Strategy</div>
+
+      <div class="field">
+        <label>Transaction Sequence</label>
+        <select id="seq">
+          <option value="sell-first">Sell First, Then Buy (avoid ABSD on 2nd property)</option>
+          <option value="buy-first">Buy First, Then Sell (pay ABSD, claim refund if eligible)</option>
+          <option value="simultaneous">Simultaneous (back-to-back)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Bridging Loan Interest (if buying before selling) (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="bridging" placeholder="0" value="0"></div>
+      </div>
+
+      <button class="calc-btn" onclick="calcCombined()">Calculate Full Picture →</button>
+    </div>
+  </div>
+
+  <!-- RIGHT RESULTS PANEL -->
+  <div class="results-area">
+
+    <!-- SELL RESULTS -->
+    <div id="result-sell">
+      <div class="result-placeholder">
+        <div class="big-icon">🏠</div>
+        <p>Enter your property details and click <strong>Calculate Net Proceeds</strong> to see your estimated sale breakdown.</p>
+      </div>
+    </div>
+
+    <!-- BUY RESULTS -->
+    <div id="result-buy" class="hidden">
+      <div class="result-placeholder">
+        <div class="big-icon">🔑</div>
+        <p>Enter your purchase details and click <strong>Calculate Total Costs</strong> to see your full buying breakdown.</p>
+      </div>
+    </div>
+
+    <!-- COMBINED RESULTS -->
+    <div id="result-combined" class="hidden">
+      <div class="result-placeholder">
+        <div class="big-icon">⇄</div>
+        <p>Fill in both tabs and click <strong>Calculate Full Picture</strong> to see your complete financial position.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── TAB SWITCHING ───────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#result-sell, #result-buy, #result-combined').forEach(r => r.classList.add('hidden'));
+
+  const tabs = ['sell','buy','combined'];
+  document.querySelectorAll('.tab-btn')[tabs.indexOf(tab)].classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('result-' + tab).classList.remove('hidden');
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────
+function fmt(n) {
+  if (n === 0) return 'S$0.00';
+  const abs = Math.abs(n);
+  return 'S$' + abs.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtSigned(n) {
+  if (n >= 0) return '+' + fmt(n);
+  return '−' + fmt(-n);
+}
+function pct(n, base) { return base ? ((n/base)*100).toFixed(2)+'%' : '—'; }
+function fmtNum(n) {
+  // Plain number with commas + 2dp (for non-currency like income, debt)
+  return Math.abs(n).toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// POLICY CONFIG — all rate constants live here.
+// Remote fetch overwrites this on load; Claude AI flags any changes.
+// ═══════════════════════════════════════════════════════════════════
+let POLICY = {
+  _meta: {
+    version: "2026.05.1",
+    label: "Singapore Property Policy — May 2026",
+    effectiveDate: "2026-05-13",
+    lastVerified: "2026-05-13"
+  },
+  bsd: {
+    tiers: [
+      { limit: 180000,  rate: 0.01 },
+      { limit: 180000,  rate: 0.02 },
+      { limit: 640000,  rate: 0.03 },
+      { limit: 500000,  rate: 0.04 },
+      { limit: 1500000, rate: 0.05 }
+    ],
+    topRate: 0.06
+  },
+  absd: {
+    rates: {
+      sc:        [0.00, 0.20, 0.30],
+      pr:        [0.05, 0.30, 0.35],
+      foreigner: [0.60, 0.60, 0.60]
+    }
+  },
+  ssd: {
+    regimes: {
+      pre2025:  { rates: [0.12, 0.08, 0.04, 0.00, 0.00] },
+      post2025: { rates: [0.16, 0.12, 0.08, 0.04, 0.00] }
+    }
+  },
+  loanLimits: {
+    bank: {
+      private: { maxLTV: 0.75, maxTenure: 35, maxAgeAtEnd: 75 },
+      hdb:     { maxLTV: 0.75, maxTenure: 30, maxAgeAtEnd: 65 }
+    },
+    hdbLoan: {
+      hdb:     { maxLTV: 0.80, maxTenure: 25, maxAgeAtEnd: 65 }
+    },
+    minCashByPropCount: [0.05, 0.25, 0.25],
+    leaseDecayMinRemaining: 20,
+    cpfLeaseToAge: 95
+  },
+  tdsr: { limit: 0.55 },
+  msr:  { limit: 0.30 },
+  hdbLoanRate: { rate: 0.026 },
+  bankRates: {
+    fixed:    { low: 0.0140, high: 0.0180, typical: 0.0150 },
+    floating: { sora1M: 0.0102, sora3M: 0.0111, effectiveLow: 0.0102, effectiveHigh: 0.0160 },
+    asOf: "2026-04"
+  },
+  cpf: { oaRate: 0.025, accrualRate: 0.025, gstOnCommission: 0.09 }
+};
+
+// ─── REMOTE CONFIG URL ────────────────────────────────────────────
+// Replace this with your own hosted JSON URL (GitHub Gist, Netlify, etc.)
+// Example: 'https://gist.githubusercontent.com/YOURNAME/HASH/raw/sg-property-policy-config.json'
+const REMOTE_CONFIG_URL = null; // ← paste your URL here when hosted
+
+const POLICY_CACHE_KEY  = 'sg_prop_policy_v1';
+const POLICY_VERSION_KEY = 'sg_prop_policy_version';
+
+// ─── POLICY UPDATE SYSTEM ─────────────────────────────────────────
+async function initPolicy() {
+  showPolicyBadge('checking');
+
+  // 1. Load cached policy first (instant, works offline)
+  const cached = loadCachedPolicy();
+  if (cached) {
+    POLICY = cached;
+    applyPolicyToRateGuide();
+  }
+
+  // 2. Fetch remote config if URL is set
+  let remotePolicy = null;
+  if (REMOTE_CONFIG_URL) {
+    remotePolicy = await fetchRemotePolicy();
+    if (remotePolicy) {
+      const changes = diffPolicy(POLICY, remotePolicy);
+      if (changes.length > 0) {
+        // Cache the new policy
+        cachePolicy(remotePolicy);
+        POLICY = remotePolicy;
+        applyPolicyToRateGuide();
+        // Run Claude AI analysis on the changes
+        await runAIAnalysis(changes, remotePolicy._meta);
+      } else {
+        showPolicyBadge('current', remotePolicy._meta);
+      }
+    } else {
+      showPolicyBadge('offline', cached ? POLICY._meta : null);
+    }
+  } else {
+    // No remote URL — run AI check against Claude's knowledge
+    await runAIStartupCheck();
+  }
+}
+
+async function fetchRemotePolicy() {
+  try {
+    const res = await fetch(REMOTE_CONFIG_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+function loadCachedPolicy() {
+  try { return JSON.parse(localStorage.getItem(POLICY_CACHE_KEY)); } catch(e) { return null; }
+}
+
+function cachePolicy(policy) {
+  try { localStorage.setItem(POLICY_CACHE_KEY, JSON.stringify(policy)); } catch(e) {}
+}
+
+// ─── POLICY DIFF ──────────────────────────────────────────────────
+function diffPolicy(oldP, newP) {
+  const changes = [];
+
+  // BSD tiers
+  const oldTiers = oldP.bsd?.tiers || [];
+  const newTiers = newP.bsd?.tiers || [];
+  newTiers.forEach((t, i) => {
+    if (!oldTiers[i] || oldTiers[i].rate !== t.rate)
+      changes.push({ field: `BSD tier ${i+1}`, old: oldTiers[i]?.rate, new: t.rate, type: 'rate' });
+    if (!oldTiers[i] || oldTiers[i].limit !== t.limit)
+      changes.push({ field: `BSD tier ${i+1} limit`, old: oldTiers[i]?.limit, new: t.limit, type: 'amount' });
+  });
+  if ((oldP.bsd?.topRate) !== newP.bsd?.topRate)
+    changes.push({ field: 'BSD top rate', old: oldP.bsd?.topRate, new: newP.bsd?.topRate, type: 'rate' });
+
+  // ABSD
+  ['sc','pr','foreigner'].forEach(group => {
+    const oldR = oldP.absd?.rates?.[group] || [];
+    const newR = newP.absd?.rates?.[group] || [];
+    newR.forEach((r, i) => {
+      if (oldR[i] !== r)
+        changes.push({ field: `ABSD ${group.toUpperCase()} property ${i+1}`, old: oldR[i], new: r, type: 'rate' });
+    });
+  });
+
+  // SSD
+  ['pre2025','post2025'].forEach(regime => {
+    const oldR = oldP.ssd?.regimes?.[regime]?.rates || [];
+    const newR = newP.ssd?.regimes?.[regime]?.rates || [];
+    newR.forEach((r, i) => {
+      if (oldR[i] !== r)
+        changes.push({ field: `SSD ${regime} year ${i+1}`, old: oldR[i], new: r, type: 'rate' });
+    });
+  });
+
+  // Loan limits
+  const lKeys = [['bank','private'],['bank','hdb'],['hdbLoan','hdb']];
+  lKeys.forEach(([k1,k2]) => {
+    ['maxTenure','maxAgeAtEnd','maxLTV'].forEach(f => {
+      const ov = oldP.loanLimits?.[k1]?.[k2]?.[f];
+      const nv = newP.loanLimits?.[k1]?.[k2]?.[f];
+      if (ov !== nv) changes.push({ field: `${k1} ${k2} ${f}`, old: ov, new: nv, type: 'limit' });
+    });
+  });
+
+  // TDSR / MSR
+  if (oldP.tdsr?.limit !== newP.tdsr?.limit)
+    changes.push({ field: 'TDSR limit', old: oldP.tdsr?.limit, new: newP.tdsr?.limit, type: 'rate' });
+  if (oldP.msr?.limit !== newP.msr?.limit)
+    changes.push({ field: 'MSR limit', old: oldP.msr?.limit, new: newP.msr?.limit, type: 'rate' });
+
+  // HDB loan rate
+  if (oldP.hdbLoanRate?.rate !== newP.hdbLoanRate?.rate)
+    changes.push({ field: 'HDB loan rate', old: oldP.hdbLoanRate?.rate, new: newP.hdbLoanRate?.rate, type: 'rate' });
+
+  // CPF GST on commission
+  if (oldP.cpf?.gstOnCommission !== newP.cpf?.gstOnCommission)
+    changes.push({ field: 'GST on commission', old: oldP.cpf?.gstOnCommission, new: newP.cpf?.gstOnCommission, type: 'rate' });
+
+  return changes;
+}
+
+// ─── CLAUDE AI ANALYSIS ───────────────────────────────────────────
+async function runAIAnalysis(changes, meta) {
+  showPolicyBadge('updating');
+  const changeList = changes.map(c =>
+    `• ${c.field}: ${c.type === 'rate' ? ((c.old||0)*100).toFixed(2)+'%' : c.old} → ${c.type === 'rate' ? ((c.new||0)*100).toFixed(2)+'%' : c.new}`
+  ).join('\n');
+
+  const prompt = `You are a Singapore property regulatory expert. The following changes were detected in the Singapore property policy configuration (version ${meta?.version}, effective ${meta?.effectiveDate}):
+
+${changeList}
+
+For each change:
+1. Confirm whether this matches announced Singapore government policy (MAS, IRAS, HDB, or CPF Board)
+2. State the announcement date and source if known
+3. Explain the practical impact on buyers and sellers in 1–2 sentences
+4. Flag any change that seems incorrect or unexpected
+
+Be concise and factual. Format as a clean summary buyers and sellers can understand.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const analysis = data.content?.[0]?.text || 'Analysis unavailable.';
+    showPolicyUpdateModal(changes, analysis, meta);
+  } catch(e) {
+    // API call failed — still show the raw changes
+    showPolicyUpdateModal(changes, 'AI analysis unavailable (API unreachable). Changes shown are from the remote config file.', meta);
+  }
+  showPolicyBadge('updated', meta);
+}
+
+async function runAIStartupCheck() {
+  // No remote URL — ask Claude to verify current hardcoded rates
+  showPolicyBadge('verifying');
+  const today = new Date().toISOString().split('T')[0];
+
+  const prompt = `You are a Singapore property regulatory expert. Today is ${today}.
+
+The following policy rates are currently hardcoded in a Singapore property calculator. Please verify each one against the latest official Singapore government policy and flag any that may be outdated or incorrect. Respond ONLY in valid JSON with this structure:
+{
+  "verified": true/false,
+  "asOf": "YYYY-MM-DD",
+  "items": [
+    { "field": "name", "currentValue": "x", "status": "ok|changed|uncertain", "note": "brief note" }
+  ],
+  "summary": "1-2 sentence overall summary"
+}
+
+Rates to verify:
+- BSD tiers: 1%/2%/3%/4%/5%/6% on S$180k/180k/640k/500k/1.5m/remainder
+- ABSD SC: 0%/20%/30% (1st/2nd/3rd+)
+- ABSD PR: 5%/30%/35%
+- ABSD Foreigner: 60%
+- SSD (pre-Jul 2025): 12%/8%/4%/0% (<1/1-2/2-3/3+yrs)
+- SSD (post-Jul 2025): 16%/12%/8%/4%/0% (<1/1-2/2-3/3-4/4+yrs)
+- HDB loan rate: 2.60% p.a.
+- Bank loan max tenure private: 35 yrs (end by age 75)
+- Bank loan max tenure HDB: 30 yrs (end by age 65)
+- HDB concessionary max tenure: 25 yrs (end by age 65)
+- TDSR limit: 55%
+- MSR limit: 30% (HDB/EC)
+- GST on agent commission: 9%
+- Min cash downpayment: 5% (1st property), 25% (2nd+)`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '{}';
+
+    let result;
+    try {
+      result = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    } catch(e) { result = null; }
+
+    if (result?.items) {
+      const flagged = result.items.filter(i => i.status !== 'ok');
+      if (flagged.length > 0) {
+        showAIVerifyModal(result, flagged);
+        showPolicyBadge('flagged', { lastVerified: result.asOf, label: 'AI verification flagged changes' });
+      } else {
+        showPolicyBadge('verified', { lastVerified: result.asOf, label: result.summary });
+        // Save verified timestamp
+        try { localStorage.setItem('sg_prop_last_verified', JSON.stringify({ date: result.asOf, summary: result.summary })); } catch(e) {}
+      }
+    } else {
+      showPolicyBadge('current', POLICY._meta);
+    }
+  } catch(e) {
+    showPolicyBadge('offline', POLICY._meta);
+  }
+}
+
+// ─── POLICY BADGE ─────────────────────────────────────────────────
+function showPolicyBadge(state, meta) {
+  const badge = document.getElementById('policy-badge');
+  if (!badge) return;
+  const states = {
+    checking:  { bg: '#22224A', color: '#9999CC', text: '🔄 Checking policy…' },
+    verifying: { bg: '#22224A', color: '#9999CC', text: '🤖 AI verifying rates…' },
+    current:   { bg: '#1B3A1B', color: '#7BC99A', text: '✓ Policy current' },
+    verified:  { bg: '#1B3A1B', color: '#7BC99A', text: '✓ AI verified' },
+    updated:   { bg: '#3A2800', color: '#FFB74D', text: '⬆ Policy updated' },
+    updating:  { bg: '#3A2800', color: '#FFB74D', text: '🤖 AI analysing…' },
+    flagged:   { bg: '#3A0010', color: '#FF8099', text: '⚠ Changes flagged' },
+    offline:   { bg: '#2A2A2A', color: '#888888', text: '📡 Offline — cached' }
+  };
+  const s = states[state] || states.current;
+  badge.style.background = s.bg;
+  badge.style.color = s.color;
+  badge.textContent = s.text;
+  if (meta?.lastVerified) badge.title = `Last verified: ${meta.lastVerified} | ${meta.label || ''}`;
+}
+
+// ─── POLICY UPDATE MODAL ──────────────────────────────────────────
+function showPolicyUpdateModal(changes, analysis, meta) {
+  const changeRows = changes.map(c => {
+    const oldFmt = c.type === 'rate' ? ((c.old||0)*100).toFixed(2)+'%' : (c.old ?? '—');
+    const newFmt = c.type === 'rate' ? ((c.new||0)*100).toFixed(2)+'%' : (c.new ?? '—');
+    return `<tr>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--ink-muted)">${c.field}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border);color:#C8102E;text-decoration:line-through">${oldFmt}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid var(--border);color:#1B7A4B;font-weight:700">${newFmt}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('policy-modal-content').innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px">Policy Changes Detected (v${meta?.version})</div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.83rem">
+        <thead><tr style="background:#F5F4F2">
+          <th style="padding:8px 10px;text-align:left;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-muted)">Field</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.72rem;color:#C8102E">Old</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.72rem;color:#1B7A4B">New</th>
+        </tr></thead>
+        <tbody>${changeRows}</tbody>
+      </table>
+    </div>
+    <div style="background:#F5F4F2;border-radius:8px;padding:13px 15px;font-size:0.82rem;line-height:1.65">
+      <div style="font-weight:700;margin-bottom:6px;font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-muted)">🤖 AI Analysis</div>
+      ${analysis.replace(/\n/g, '<br>')}
+    </div>
+    <div style="margin-top:10px;font-size:0.72rem;color:var(--ink-muted)">Calculator rates have been automatically updated. Effective date: ${meta?.effectiveDate || 'see source'}.</div>`;
+  document.getElementById('policy-modal').classList.add('open');
+}
+
+function showAIVerifyModal(result, flagged) {
+  const rows = flagged.map(item => `
+    <div style="padding:10px 12px;border-radius:8px;border:1.5px solid ${item.status==='changed'?'#F5A0B0':'#FFD580'};margin-bottom:8px;font-size:0.83rem;background:${item.status==='changed'?'#FFF5F7':'#FFFBF0'}">
+      <div style="font-weight:700;margin-bottom:2px">${item.field} <span style="font-weight:400;color:var(--ink-muted)">(current: ${item.currentValue})</span></div>
+      <div style="color:${item.status==='changed'?'#7A0020':'#7A5000'}">${item.status === 'changed' ? '⚠️ May have changed:' : '❓ Uncertain:'} ${item.note}</div>
+    </div>`).join('');
+
+  document.getElementById('policy-modal-content').innerHTML = `
+    <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:10px">🤖 AI Rate Verification — ${result.asOf}</div>
+    ${rows}
+    <div style="background:#F5F4F2;border-radius:8px;padding:12px 14px;font-size:0.82rem;margin-top:12px;line-height:1.6">
+      <strong>Summary:</strong> ${result.summary}
+    </div>
+    <div style="margin-top:10px;font-size:0.72rem;color:var(--ink-muted)">⚠️ Please verify flagged items at iras.gov.sg, hdb.gov.sg, or mas.gov.sg before transacting. The calculator continues to use the current hardcoded values until the remote config is updated.</div>`;
+  document.getElementById('policy-modal').classList.add('open');
+}
+
+// ─── APPLY POLICY TO RATE GUIDE ───────────────────────────────────
+function applyPolicyToRateGuide() {
+  // Update RATE_GUIDE content dynamically from POLICY object
+  const hdbRate = (POLICY.hdbLoanRate.rate * 100).toFixed(2);
+  const fixLow  = (POLICY.bankRates.fixed.low * 100).toFixed(2);
+  const fixHigh = (POLICY.bankRates.fixed.high * 100).toFixed(2);
+  const floLow  = (POLICY.bankRates.floating.effectiveLow * 100).toFixed(2);
+  const floHigh = (POLICY.bankRates.floating.effectiveHigh * 100).toFixed(2);
+  const sora1m  = (POLICY.bankRates.floating.sora1M * 100).toFixed(2);
+  const sora3m  = (POLICY.bankRates.floating.sora3M * 100).toFixed(2);
+
+  RATE_GUIDE.bank.content = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px">
+      <div><strong>Fixed (1–3 yr lock-in)</strong></div><div><strong>Floating (SORA-linked)</strong></div>
+      <div style="color:#1B4B7A">Best rate: ~${fixLow}% p.a.</div><div style="color:#1B4B7A">Best rate: ~${floLow}% p.a.</div>
+      <div>Typical range: ${fixLow}%–${fixHigh}%</div><div>1M SORA: ${sora1m}%; 3M SORA: ${sora3m}%</div>
+      <div colspan="2" style="grid-column:1/-1;color:#6B6B7B;font-size:0.76rem;margin-top:2px">As of ${POLICY.bankRates.asOf}. Lock-in penalties typically 1–1.5% of outstanding loan.</div>
+    </div>`;
+
+  RATE_GUIDE.hdb.content = `
+    <div>
+      <div><strong style="color:#1B7A4B">Rate: ${hdbRate}% p.a.</strong> — CPF OA rate (${(POLICY.cpf.oaRate*100).toFixed(1)}%) + 0.1%</div>
+      <div style="margin-top:4px">Reviewed quarterly. Last changed: ${POLICY.hdbLoanRate.lastChanged || '2004'}</div>
+      <div style="margin-top:4px;color:#6B6B7B;font-size:0.76rem">No lock-in period. ${POLICY.loanLimits.hdbLoan.hdb.maxLTV*100}% LTV. Once switched to bank loan, cannot revert to HDB loan.</div>
+    </div>`;
+
+  RATE_GUIDE.bank.defaultRate = POLICY.bankRates.fixed.typical * 100;
+  RATE_GUIDE.hdb.defaultRate  = POLICY.hdbLoanRate.rate * 100;
+}
+
+
+
+// ─── BSD CALCULATION (uses POLICY) ───────────────────────────────
+function calcBSD(price) {
+  let bsd = 0;
+  let remaining = price;
+  for (const t of POLICY.bsd.tiers) {
+    if (remaining <= 0) break;
+    const chunk = Math.min(remaining, t.limit);
+    bsd += chunk * t.rate;
+    remaining -= chunk;
+  }
+  if (remaining > 0) bsd += remaining * POLICY.bsd.topRate;
+  return Math.floor(bsd);
+}
+
+// ─── ABSD CALCULATION (uses POLICY) ──────────────────────────────
+function calcABSD(price, citizenship, propCount) {
+  const rates = POLICY.absd.rates[citizenship] || [0, 0, 0];
+  const idx   = Math.min(propCount, rates.length - 1);
+  return Math.floor(price * rates[idx]);
+}
+
+// ─── SSD CALCULATION (uses POLICY) ───────────────────────────────
+function calcSSD(price, era, yearsHeld) {
+  if (era === 'hdb') return 0;
+  const y      = parseInt(yearsHeld);
+  const regime = era === 'pre2025' ? POLICY.ssd.regimes.pre2025 : POLICY.ssd.regimes.post2025;
+  return Math.floor(price * (regime.rates[Math.min(y, regime.rates.length - 1)] || 0));
+}
+
+
+function calcSell() {
+  const price       = parseFloat(document.getElementById('sell-price').value) || 0;
+  const loan        = parseFloat(document.getElementById('sell-loan').value) || 0;
+  const cpf         = parseFloat(document.getElementById('sell-cpf').value) || 0;
+  const commRate    = parseFloat(document.getElementById('sell-commission').value) || 0;
+  const legal       = parseFloat(document.getElementById('sell-legal').value) || 0;
+  const redemption  = parseFloat(document.getElementById('sell-redemption').value) || 0;
+  const lockin      = document.getElementById('sell-lockin').checked;
+  const levyOn      = document.getElementById('sell-levy').checked;
+  const levyAmt     = parseFloat(document.getElementById('sell-levy-amt').value) || 0;
+  const misc        = parseFloat(document.getElementById('sell-misc').value) || 0;
+  const era         = document.getElementById('sell-ssd-era').value;
+  const yearsHeld   = document.querySelector('input[name="sell-years"]:checked')?.value || '4';
+
+  if (!price) { alert('Please enter the selling price.'); return; }
+
+  const commission    = Math.round(price * commRate / 100);
+  const gst           = Math.round(commission * POLICY.cpf.gstOnCommission);
+  const ssd           = calcSSD(price, era, yearsHeld);
+  const lockInPenalty = lockin ? Math.round(loan * 0.015) : 0;
+  const levy          = levyOn ? levyAmt : 0;
+
+  // ── PROCEEDS FLOW ──────────────────────────────────────────────
+  // Sale price is received as cash by lawyer first.
+  // From that cash pool, deductions are settled in this order:
+  //   1. Outstanding loan repayment          → reduces cash pool (cash out)
+  //   2. CPF principal + accrued interest    → goes back to CPF-OA (not cash)
+  //   3. SSD (cash only, cannot use CPF)     → reduces cash pool
+  //   4. Agent commission + GST              → reduces cash pool
+  //   5. Legal / conveyancing fees           → reduces cash pool
+  //   6. Mortgage redemption admin fee       → reduces cash pool
+  //   7. Lock-in penalty (if any)            → reduces cash pool
+  //   8. HDB Resale Levy (if any)            → reduces cash pool
+  //   9. Property tax / MCST proration       → reduces cash pool
+  // Remainder = NET CASH TO SELLER
+  // CPF refund goes entirely back to CPF-OA
+
+  // Cash deductions (paid out of sale proceeds in cash)
+  const cashDeductions = loan + commission + gst + legal + redemption + lockInPenalty + levy + misc + ssd;
+  // CPF component: goes back to CPF-OA, never received as cash
+  const cpfReturned   = cpf;
+
+  const grossCashAfterLoan = price - loan;           // what's left after bank paid
+  const netCashToSeller    = price - cashDeductions - cpfReturned;
+  const totalDeductions    = cashDeductions + cpfReturned;
+
+  // Visual bar
+  const cashPct = price > 0 ? ((Math.max(0, netCashToSeller) / price) * 100).toFixed(2) : '0.00';
+  const cpfPct  = price > 0 ? ((cpfReturned / price) * 100).toFixed(2) : '0.00';
+  const dedPct  = price > 0 ? ((cashDeductions / price) * 100).toFixed(2) : '0.00';
+
+  function proceedsRow(label, cashAmt, cpfAmt, tag) {
+    const tagMap = { cash: ['Cash deducted','#DDEEFF','#1B4B7A'], cpf: ['→ CPF-OA','#D6F0E3','#1B7A4B'], receive: ['Cash to you','#E6F5EE','#1B7A4B'] };
+    const t = tagMap[tag] || [];
+    const tagHtml = t.length ? `<span class="split-tag" style="background:${t[1]};color:${t[2]}">${t[0]}</span>` : '';
+    return `<tr>
+      <td class="item-name">${label}${tagHtml}</td>
+      <td class="cash-val">${cashAmt !== null && cashAmt > 0 ? fmt(cashAmt) : cashAmt === 0 ? '<span class="zero-val">—</span>' : ''}</td>
+      <td class="cpf-val">${cpfAmt !== null && cpfAmt > 0 ? fmt(cpfAmt) : cpfAmt === 0 ? '<span class="zero-val">—</span>' : ''}</td>
+      <td class="row-value">${fmt((cashAmt||0)+(cpfAmt||0))}</td>
+    </tr>`;
+  }
+
+  const el = document.getElementById('result-sell');
+  el.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="results-title">Sale Proceeds Breakdown</div>
+        <div class="results-subtitle">Cash vs CPF-OA split — selling price ${fmt(price)}</div>
+      </div>
+    </div>
+
+    <div class="summary-strip">
+      <div class="sum-card highlight">
+        <div class="sum-label">Gross Sale Price</div>
+        <div class="sum-value">${fmt(price)}</div>
+        <div class="sum-note">total proceeds received</div>
+      </div>
+      <div class="sum-card" style="border-left:4px solid #1B4B7A">
+        <div class="sum-label" style="color:#1B4B7A">💵 Net Cash to You</div>
+        <div class="sum-value" style="color:#1B4B7A">${fmt(netCashToSeller)}</div>
+        <div class="sum-note">${pct(Math.max(0,netCashToSeller), price)} of sale price</div>
+      </div>
+      <div class="sum-card" style="border-left:4px solid #1B7A4B">
+        <div class="sum-label" style="color:#1B7A4B">🏦 CPF-OA Returned</div>
+        <div class="sum-value" style="color:#1B7A4B">${fmt(cpfReturned)}</div>
+        <div class="sum-note">${pct(cpfReturned, price)} of sale price</div>
+      </div>
+      <div class="sum-card ${ssd > 0 ? 'warn' : ''}">
+        <div class="sum-label">Cash Deductions</div>
+        <div class="sum-value">${fmt(cashDeductions)}</div>
+        <div class="sum-note">${ssd > 0 ? 'incl. SSD ' + fmt(ssd) : pct(cashDeductions,price) + ' of sale price'}</div>
+      </div>
+    </div>
+
+    ${ssd > 0 ? `<div class="absd-warning">⚠️ <strong>Seller's Stamp Duty of ${fmt(ssd)}</strong> applies — must be paid in <strong>cash within 14 days</strong> of signing S&P Agreement. CPF cannot be used to pay SSD.</div>` : ''}
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">📊 Proceeds Distribution</div>
+      <div style="padding:14px 18px">
+        <div class="fund-bar-label">
+          <span style="color:#1B4B7A">💵 Cash to you: ${fmt(Math.max(0,netCashToSeller))} (${cashPct}%)</span>
+          <span style="color:#1B7A4B">🏦 CPF-OA: ${fmt(cpfReturned)} (${cpfPct}%)</span>
+        </div>
+        <div class="fund-bar">
+          <div class="fund-bar-cash" style="width:${cashPct}%"></div>
+          <div class="fund-bar-cpf"  style="width:${cpfPct}%"></div>
+          <div class="fund-bar-short" style="width:${dedPct}%"></div>
+        </div>
+        <div class="fund-legend">
+          <span><span class="legend-dot" style="background:#1B4B7A"></span>Net cash to you</span>
+          <span><span class="legend-dot" style="background:#1B7A4B"></span>CPF-OA returned</span>
+          <span><span class="legend-dot" style="background:#C8102E"></span>Cash deducted (fees)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">💳 Full Proceeds Split — Cash vs CPF-OA</div>
+      <table class="split-table">
+        <thead>
+          <tr>
+            <th style="width:44%">Item</th>
+            <th class="cash-col">💵 Cash</th>
+            <th class="cpf-col">🏦 CPF-OA</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#F9F9F9">
+            <td colspan="4" style="padding:8px 14px;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;color:var(--ink-muted);text-transform:uppercase">INFLOW</td>
+          </tr>
+          <tr>
+            <td class="item-name">Gross Sale Price</td>
+            <td class="cash-val">${fmt(price)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(price)}</td>
+          </tr>
+          <tr style="background:#F9F9F9">
+            <td colspan="4" style="padding:8px 14px;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;color:var(--ink-muted);text-transform:uppercase">DEDUCTIONS FROM CASH PROCEEDS</td>
+          </tr>
+          <tr>
+            <td class="item-name">Outstanding Loan Repayment <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(loan)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(loan)}</td>
+          </tr>
+          <tr>
+            <td class="item-name">CPF Refund (Principal + Accrued Interest) <span class="split-tag tag-cpf">→ CPF-OA</span></td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="cpf-val" style="color:#C8102E">− ${fmt(cpfReturned)}</td>
+            <td class="row-value">${fmt(cpfReturned)}</td>
+          </tr>
+          <tr><td colspan="4" class="note-row">CPF refund goes directly back to your CPF-OA account, not as cash in hand. Accrued interest ≈2.5% p.a. on CPF principal used.</td></tr>
+          ${ssd > 0 ? `<tr>
+            <td class="item-name">Seller's Stamp Duty (SSD) <span class="split-tag tag-cash">Cash only</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(ssd)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(ssd)}</td>
+          </tr>` : ''}
+          <tr>
+            <td class="item-name">Agent Commission (${commRate}%) <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(commission)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(commission)}</td>
+          </tr>
+          <tr>
+            <td class="item-name">GST on Commission (9%) <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(gst)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(gst)}</td>
+          </tr>
+          <tr>
+            <td class="item-name">Legal / Conveyancing Fees <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(legal)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(legal)}</td>
+          </tr>
+          <tr>
+            <td class="item-name">Mortgage Redemption Admin Fee <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(redemption)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(redemption)}</td>
+          </tr>
+          ${lockInPenalty > 0 ? `<tr>
+            <td class="item-name">Bank Lock-in Penalty <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(lockInPenalty)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(lockInPenalty)}</td>
+          </tr>` : ''}
+          ${levy > 0 ? `<tr>
+            <td class="item-name">HDB Resale Levy <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(levy)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(levy)}</td>
+          </tr>` : ''}
+          ${misc > 0 ? `<tr>
+            <td class="item-name">Property Tax / MCST Proration <span class="split-tag tag-cash">Cash deducted</span></td>
+            <td class="cash-val" style="color:#C8102E">− ${fmt(misc)}</td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="row-value">${fmt(misc)}</td>
+          </tr>` : ''}
+          <tr style="background:#F9F9F9">
+            <td colspan="4" style="padding:8px 14px;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;color:var(--ink-muted);text-transform:uppercase">NET PROCEEDS YOU RECEIVE</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td><strong>Net Proceeds</strong></td>
+            <td class="cash-val">${fmt(netCashToSeller)}</td>
+            <td class="cpf-val">${fmt(cpfReturned)}</td>
+            <td><strong>${fmt(netCashToSeller + cpfReturned)}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="note-row" style="border-top:1px dashed var(--border)">
+        <strong>Remember:</strong> Your CPF-OA amount of ${fmt(cpfReturned)} is returned to your CPF-OA account and can be used for your next property purchase (downpayment, BSD reimbursement, or legal fees). Only the <strong>cash portion of ${fmt(netCashToSeller)}</strong> is yours to spend freely.
+      </div>
+    </div>
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">📋 Key Notes</div>
+      <div class="note-row">• <strong>No Capital Gains Tax</strong> in Singapore for individual sellers (unless IRAS deems you a property trader).</div>
+      <div class="note-row">• <strong>SSD</strong> (if applicable) must be paid within 14 days of signing S&amp;P Agreement — cash only, CPF cannot be used.</div>
+      <div class="note-row">• <strong>Commission</strong> is typically negotiated and deducted from sale proceeds at completion by the lawyer.</div>
+      <div class="note-row">• <strong>CPF accrued interest</strong> is computed at 2.5% p.a. on the CPF principal withdrawn. The exact figure is available from CPF Board's online portal.</div>
+    </div>
+
+    <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Estimates for planning purposes only. Actual figures depend on CPF Board's exact accrued interest computation, bank's redemption statement, and lawyer's final account. Rates reflect Singapore regulations as of April 2026.</div>
+  `;
+}
+
+// ─── LOAN RULES & AFFORDABILITY ───────────────────────────────────
+function getMaxTenure(loanType, age, buyType, remainingLease) {
+  const age_  = parseInt(age) || 35;
+  const lease = parseInt(remainingLease) || 99;
+  if (loanType === 'none') return null;
+
+  let limits;
+  if (loanType === 'bank') {
+    limits = buyType === 'hdb' ? POLICY.loanLimits.bank.hdb : POLICY.loanLimits.bank.private;
+  } else {
+    limits = POLICY.loanLimits.hdbLoan.hdb;
+  }
+
+  const maxByAge  = Math.max(0, limits.maxAgeAtEnd - age_);
+  const maxByType = limits.maxTenure;
+  const minLease  = POLICY.loanLimits.leaseDecayMinRemaining;
+  const maxByLease = lease < 60 ? Math.max(0, lease - minLease) : maxByType;
+
+  return Math.min(maxByAge, maxByType, maxByLease);
+}
+
+function calcMonthlyInstalment(principal, annualRate, tenureYears) {
+  if (!principal || !tenureYears) return 0;
+  const r = (annualRate / 100) / 12;
+  const n = tenureYears * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+}
+
+// ─── RATE GUIDE CONTENT ───────────────────────────────────────────
+const RATE_GUIDE = {
+  bank: {
+    label: 'Bank Loan (Fixed & Floating)',
+    defaultRate: 1.5,
+    content: `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px">
+        <div><strong>Fixed (1–3 yr lock-in)</strong></div><div><strong>Floating (SORA-linked)</strong></div>
+        <div style="color:#1B4B7A">Best rate: ~1.40% p.a.</div><div style="color:#1B4B7A">Best rate: ~1.02% p.a. (1M SORA + 0%)</div>
+        <div>Typical range: 1.40%–1.80%</div><div>Typical range: 1.02%–1.60%</div>
+        <div>Lock-in: 1–3 years</div><div>3M SORA: ~1.11%; spread +0.3%–0.75%</div>
+        <div colspan="2" style="grid-column:1/-1;color:#6B6B7B;font-size:0.76rem;margin-top:2px">Fixed rates offer certainty; floating tracks SORA which is currently near a 3-year low. Fixed rates below 2.6% HDB rate make bank loans attractive in 2026. Lock-in penalties typically 1–1.5% of outstanding loan.</div>
+      </div>`
+  },
+  hdb: {
+    label: 'HDB Concessionary Loan',
+    defaultRate: 2.6,
+    content: `
+      <div>
+        <div><strong style="color:#1B7A4B">Rate: 2.60% p.a.</strong> — fixed at CPF OA rate (2.5%) + 0.1%</div>
+        <div style="margin-top:4px">Reviewed quarterly (Jan, Apr, Jul, Oct) — unchanged since 2004</div>
+        <div style="margin-top:4px;color:#6B6B7B;font-size:0.76rem">Advantages: No lock-in period, 80% LTV (vs 75% for bank), full CPF-OA downpayment allowed, can refinance to bank anytime. Disadvantage: Rate is currently ~1% higher than best bank rates. <strong>Note: Once you switch to a bank loan, you cannot switch back to HDB concessionary.</strong></div>
+      </div>`
+  },
+  none: {
+    label: 'No Loan',
+    defaultRate: 0,
+    content: `<div>Full cash / CPF purchase — no interest cost. No TDSR/MSR applies.</div>`
+  }
+};
+
+function updateLoanRules() {
+  const loanType = document.querySelector('input[name="loan-type"]:checked').value;
+  document.getElementById('loan-fields').style.display = loanType === 'none' ? 'none' : 'block';
+
+  // Update rate guide card
+  const guide = RATE_GUIDE[loanType];
+  document.getElementById('rate-guide-content').innerHTML = guide.content;
+
+  // Set default rate and hint
+  const rateInput = document.getElementById('buy-rate');
+  const rateHint  = document.getElementById('rate-hint');
+  const rateLabel = document.getElementById('rate-type-label');
+
+  if (loanType === 'bank') {
+    rateInput.value = 1.5;
+    rateInput.step  = '0.05';
+    rateLabel.textContent = '— bank loan (fixed/floating)';
+    rateHint.innerHTML = 'Fixed: 1.40%–1.80% | Floating (SORA): 1.02%–1.60% as of Apr 2026. Use a blended estimate for long-term planning.';
+  } else if (loanType === 'hdb') {
+    rateInput.value = 2.6;
+    rateInput.step  = '0.1';
+    rateLabel.textContent = '— HDB concessionary (locked)';
+    rateHint.innerHTML = 'HDB rate is pegged at CPF OA + 0.1% = <strong>2.60% p.a.</strong> Fixed since 2004. Adjust only if projecting future changes.';
+  } else {
+    rateInput.value = 0;
+    rateLabel.textContent = '';
+    rateHint.innerHTML = '';
+  }
+
+  checkTenure();
+}
+
+function checkTenure() {
+  const loanType   = document.querySelector('input[name="loan-type"]:checked').value;
+  const age        = parseInt(document.getElementById('buy-age').value) || 0;
+  const tenure     = parseInt(document.getElementById('buy-tenure').value) || 0;
+  const lease      = parseInt(document.getElementById('buy-lease').value) || 99;
+  const buyType    = document.querySelector('input[name="buy-type"]:checked').value;
+  const warnEl     = document.getElementById('tenure-warning');
+  const infoEl     = document.getElementById('tenure-info');
+  const leaseWarn  = document.getElementById('lease-warning');
+
+  warnEl.style.display = 'none';
+  infoEl.style.display = 'none';
+  leaseWarn.style.display = 'none';
+
+  if (!age || loanType === 'none') return;
+
+  const maxTenure = getMaxTenure(loanType, age, buyType, lease);
+
+  // Lease coverage check: youngest buyer must be covered to age 95
+  const leaseAtEndOfLoan = lease - (tenure || 0);
+  const ageAtEndOfLoan   = age + (tenure || 0);
+  const yearsToAge95     = 95 - age;
+  if (lease < yearsToAge95) {
+    leaseWarn.style.display = 'block';
+    leaseWarn.textContent = `⚠️ Remaining lease (${lease} yrs) does not cover youngest buyer to age 95. CPF usage may be restricted or prorated by CPF Board.`;
+  }
+
+  if (tenure > 0) {
+    if (tenure > maxTenure) {
+      warnEl.style.display = 'block';
+      warnEl.textContent   = `⚠️ Exceeds maximum allowed tenure of ${maxTenure} years for your age (${age}) and loan type. Lender will cap at ${maxTenure} yrs.`;
+    } else {
+      infoEl.style.display = 'block';
+      infoEl.textContent   = `✓ Tenure of ${tenure} yrs is within the allowed maximum of ${maxTenure} yrs. Loan ends when you are ${age + tenure} years old.`;
+    }
+  }
+}
+
+function checkAffordability() {
+  // No-op — affordability is shown only in the results panel (calcBuy).
+  // Live updates are handled by refreshAffordability().
+}
+
+function refreshAffordability() {
+  // If the buy results panel is already showing, update just the affordability
+  // section within it so income/debt/rate changes reflect immediately.
+  const resultsEl = document.getElementById('result-buy');
+  const afEl = resultsEl ? resultsEl.querySelector('#live-affordability') : null;
+  if (!afEl) return; // results not yet calculated — do nothing
+
+  const loanAmt  = parseFloat(document.getElementById('buy-loan').value) || 0;
+  const income   = parseFloat(document.getElementById('buy-income').value) || 0;
+  const debt     = parseFloat(document.getElementById('buy-debt').value) || 0;
+  const rate     = parseFloat(document.getElementById('buy-rate').value) || 1.5;
+  const tenure   = parseInt(document.getElementById('buy-tenure').value) || 25;
+  const buyType  = document.querySelector('input[name="buy-type"]:checked').value;
+  const isHdbEc  = buyType === 'hdb';
+
+  if (!income || !loanAmt) {
+    afEl.innerHTML = '';
+    return;
+  }
+
+  const monthly      = calcMonthlyInstalment(loanAmt, rate, tenure);
+  const tdsr         = ((monthly + debt) / income) * 100;
+  const msr          = (monthly / income) * 100;
+  const tdsrBreached = tdsr > POLICY.tdsr.limit * 100;
+  const msrBreached  = isHdbEc && msr > POLICY.msr.limit * 100;
+  const maxLoanTDSR  = calcMaxLoan(income, debt, rate, tenure);
+  const tdsrPct      = (POLICY.tdsr.limit * 100).toFixed(0);
+  const msrPct       = (POLICY.msr.limit * 100).toFixed(0);
+
+  afEl.innerHTML = buildAffordabilityHTML(monthly, rate, tenure, tdsr, msr, tdsrBreached, msrBreached, maxLoanTDSR, income, tdsrPct, msrPct, isHdbEc);
+
+  // Also keep updateLoanRules in sync for rate guide hint
+  updateLoanRules();
+}
+
+// ─── SHARED AFFORDABILITY HTML BUILDER ───────────────────────────
+function buildAffordabilityHTML(monthly, rate, tenure, tdsr, msr, tdsrBreached, msrBreached, maxLoanTDSR, income, tdsrPct, msrPct, isHdbEc) {
+  const allOk = !tdsrBreached && !msrBreached;
+  return `
+    <div class="breakdown-row">
+      <span class="row-label">Est. Monthly Instalment @ ${rate}% p.a.</span>
+      <span class="row-value">S$${fmtNum(monthly)}</span>
+    </div>
+    <div class="note-row" style="color:#1B4B7A;background:#EEF4FF">
+      💡 <strong>Rate context (Apr 2026):</strong>
+      ${document.querySelector('input[name="loan-type"]:checked')?.value === 'hdb'
+        ? `HDB concessionary: fixed at <strong>${(POLICY.hdbLoanRate.rate*100).toFixed(2)}% p.a.</strong> Note: some bank fixed rates are currently lower.`
+        : `Fixed rates: <strong>${(POLICY.bankRates.fixed.low*100).toFixed(2)}%–${(POLICY.bankRates.fixed.high*100).toFixed(2)}%</strong> p.a. | Floating (SORA): <strong>~${(POLICY.bankRates.floating.effectiveLow*100).toFixed(2)}%–${(POLICY.bankRates.floating.effectiveHigh*100).toFixed(2)}%</strong> p.a.`}
+    </div>
+    ${income > 0 ? `
+    <div style="height:1px;background:var(--border);margin:4px 0"></div>
+    <div class="breakdown-row">
+      <span class="row-label">Gross Monthly Income</span>
+      <span class="row-value">S$${fmtNum(income)}</span>
+    </div>
+    <div class="breakdown-row">
+      <span class="row-label">TDSR <span style="font-weight:400;font-size:0.8rem">(must be ≤ ${tdsrPct}%)</span></span>
+      <span class="row-value ${tdsrBreached ? 'deduct' : ''}">${tdsr.toFixed(2)}% ${tdsrBreached ? '❌' : '✅'}</span>
+    </div>
+    ${isHdbEc ? `<div class="breakdown-row">
+      <span class="row-label">MSR <span style="font-weight:400;font-size:0.8rem">(HDB/EC — must be ≤ ${msrPct}%)</span></span>
+      <span class="row-value ${msrBreached ? 'deduct' : ''}">${msr.toFixed(2)}% ${msrBreached ? '❌' : '✅'}</span>
+    </div>` : ''}
+    ${tdsrBreached ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">
+      ⚠️ <strong>TDSR Breached.</strong> Max loan at ${tdsrPct}% TDSR: <strong>${fmt(maxLoanTDSR)}</strong>. Consider reducing loan amount or extending tenure.
+    </div>` : ''}
+    ${msrBreached ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">
+      ⚠️ <strong>MSR Breached.</strong> Max monthly instalment: ${fmt(income * POLICY.msr.limit)}.
+    </div>` : ''}
+    ${allOk && income > 0 ? `<div class="note-row" style="color:#0D4D30;background:#E6F5EE">
+      ✅ <strong>Affordability check passed.</strong> TDSR (${tdsr.toFixed(2)}%) is within the ${tdsrPct}% MAS limit${isHdbEc ? ` and MSR (${msr.toFixed(2)}%) is within the ${msrPct}% limit` : ''}.
+    </div>` : ''}` : ''}`;
+}
+
+function calcMaxLoan(income, existingDebt, rate, tenure) {
+  const maxMonthly = income * POLICY.tdsr.limit - existingDebt;
+  if (maxMonthly <= 0) return 0;
+  const r = (rate / 100) / 12;
+  const n = tenure * 12;
+  if (r === 0) return maxMonthly * n;
+  return maxMonthly * (Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n));
+}
+
+// ─── BUY CALCULATION ──────────────────────────────────────────────
+function calcBuy() {
+  const price       = parseFloat(document.getElementById('buy-price').value) || 0;
+  const citizenship = document.getElementById('buy-citizenship').value;
+  const propCount   = parseInt(document.querySelector('input[name="buy-props"]:checked')?.value || '0');
+  const loanType    = document.querySelector('input[name="loan-type"]:checked').value;
+  const loanAmt     = loanType !== 'none' ? (parseFloat(document.getElementById('buy-loan').value) || 0) : 0;
+  const age         = parseInt(document.getElementById('buy-age')?.value) || 0;
+  const tenure      = parseInt(document.getElementById('buy-tenure')?.value) || 0;
+  const lease       = parseInt(document.getElementById('buy-lease')?.value) || 99;
+  const income      = parseFloat(document.getElementById('buy-income')?.value) || 0;
+  const existDebt   = parseFloat(document.getElementById('buy-debt')?.value) || 0;
+  const intRate     = parseFloat(document.getElementById('buy-rate')?.value) || 3.5;
+  const valuation   = parseFloat(document.getElementById('buy-valuation').value) || 0;
+  const commRate    = parseFloat(document.getElementById('buy-commission').value) || 0;
+  const legal       = parseFloat(document.getElementById('buy-legal').value) || 0;
+  const insurance   = parseFloat(document.getElementById('buy-insurance').value) || 0;
+  const reno        = parseFloat(document.getElementById('buy-reno').value) || 0;
+  const cpfAvail    = parseFloat(document.getElementById('buy-cpf-avail').value) || 0;
+  const cashAvail   = parseFloat(document.getElementById('buy-cash-avail').value) || 0;
+
+  if (!price) { alert('Please enter the purchase price.'); return; }
+
+  const buyType   = document.querySelector('input[name="buy-type"]:checked').value;
+
+  // ── LOAN ELIGIBILITY ─────────────────────────────────────────────
+  const maxTenure    = loanType !== 'none' && age ? getMaxTenure(loanType, age, buyType, lease) : null;
+  const effectiveTen = tenure > 0 ? Math.min(tenure, maxTenure || tenure) : (maxTenure || 25);
+  const monthly      = loanAmt > 0 && effectiveTen > 0 ? calcMonthlyInstalment(loanAmt, intRate, effectiveTen) : 0;
+  const tdsr         = income > 0 ? ((monthly + existDebt) / income) * 100 : null;
+  const msr          = income > 0 ? (monthly / income) * 100 : null;
+  const isHdbEc      = buyType === 'hdb';
+  const tdsrBreached = tdsr !== null && tdsr > POLICY.tdsr.limit * 100;
+  const msrBreached  = isHdbEc && msr !== null && msr > POLICY.msr.limit * 100;
+  const maxLoanTDSR  = income > 0 ? calcMaxLoan(income, existDebt, intRate, effectiveTen) : null;
+  const leaseCovers95 = lease >= (95 - (age || 0));
+  const ageAtEnd     = age && effectiveTen ? age + effectiveTen : null;
+
+  // Min 5% cash for bank loan; if HDB concessionary loan, 10% cash (or CPF can cover most)
+  // For private bank loan: 5% cash min, remainder CPF-OA or cash
+  // For 2nd property: LTV 55% (45% down), min 25% cash
+  // For 3rd+ property: LTV 35% (65% down), min 25% cash
+  let minCashPct = 0.05;
+  if (propCount >= 1) minCashPct = 0.25;
+  if (propCount >= 2) minCashPct = 0.25;
+  if (buyType === 'hdb') minCashPct = 0.00; // HDB loan allows full CPF for downpayment component
+
+  const downpayment = price - loanAmt;
+  const minCashDown = Math.round(price * minCashPct);
+  const maxCpfDown  = Math.max(0, downpayment - minCashDown);
+  // User chooses how to split within the allowed bands; we show the max CPF usage scenario
+  const cpfForDown  = Math.min(maxCpfDown, cpfAvail);
+  const cashForDown = downpayment - cpfForDown;
+
+  const bsd  = calcBSD(price);
+  const absd = calcABSD(price, citizenship, propCount);
+  const absdRate = absd > 0 ? (absd / price * 100) : 0;
+
+  // BSD: pay cash first, then CPF reimbursement allowed
+  // ABSD: pay cash first, then CPF reimbursement allowed
+  // Legal: can use CPF-OA
+  // Valuation: cash only
+  // Agent comm: cash only
+  // Insurance: cash only
+  // Reno: cash only
+
+  const buyerComm    = Math.round(price * commRate / 100);
+  const buyerCommGST = Math.round(buyerComm * POLICY.cpf.gstOnCommission);
+  const totalComm    = buyerComm + buyerCommGST;
+
+  // CPF remaining after downpayment
+  let cpfLeft = Math.max(0, cpfAvail - cpfForDown);
+
+  // BSD: initially cash, CPF reimbursable
+  const cpfForBSD  = Math.min(bsd, cpfLeft);  cpfLeft -= cpfForBSD;
+  const cashForBSD = bsd - cpfForBSD;
+
+  // ABSD: initially cash, CPF reimbursable
+  const cpfForABSD  = Math.min(absd, cpfLeft); cpfLeft -= cpfForABSD;
+  const cashForABSD = absd - cpfForABSD;
+
+  // Legal: CPF-OA allowed
+  const cpfForLegal  = Math.min(legal, cpfLeft); cpfLeft -= cpfForLegal;
+  const cashForLegal = legal - cpfForLegal;
+
+  // Valuation: cash only
+  const cashForVal = valuation;
+
+  // Agent commission: cash only
+  const cashForComm = totalComm;
+
+  // Insurance: cash only
+  const cashForIns = insurance;
+
+  // Renovation: cash only
+  const cashForReno = reno;
+
+  // Totals
+  const totalCPF  = cpfForDown + cpfForBSD + cpfForABSD + cpfForLegal;
+  const totalCash = cashForDown + cashForBSD + cashForABSD + cashForLegal + cashForVal + cashForComm + cashForIns + cashForReno;
+  const grandTotal = totalCPF + totalCash;
+
+  // Shortfall / surplus analysis
+  const cpfShortfall  = Math.max(0, totalCPF - cpfAvail);
+  const cashShortfall = Math.max(0, totalCash - cashAvail);
+  const cpfSurplus    = Math.max(0, cpfAvail - totalCPF);
+  const cashSurplus   = Math.max(0, cashAvail - totalCash);
+  const hasInputFunds = cpfAvail > 0 || cashAvail > 0;
+
+  // Bar widths
+  const totalFunds = cpfAvail + cashAvail;
+  const barCashW   = totalFunds > 0 ? Math.min(100, (Math.min(cashAvail, totalCash) / grandTotal) * 100) : 0;
+  const barCpfW    = totalFunds > 0 ? Math.min(100 - barCashW, (Math.min(cpfAvail, totalCPF) / grandTotal) * 100) : 0;
+  const barShortW  = totalFunds > 0 ? Math.max(0, 100 - barCashW - barCpfW) : 0;
+
+  function splitRow(label, cashAmt, cpfAmt, tag) {
+    const tagHtml = tag ? `<span class="split-tag tag-${tag}">${tag === 'cash' ? 'Cash only' : tag === 'cpf' ? 'CPF-OA' : 'Cash → CPF reimb.'}</span>` : '';
+    return `<tr>
+      <td class="item-name">${label}${tagHtml}</td>
+      <td class="cash-val">${cashAmt > 0 ? fmt(cashAmt) : '<span class="zero-val">—</span>'}</td>
+      <td class="cpf-val">${cpfAmt > 0 ? fmt(cpfAmt) : '<span class="zero-val">—</span>'}</td>
+      <td class="row-value">${fmt(cashAmt + cpfAmt)}</td>
+    </tr>`;
+  }
+
+  const el = document.getElementById('result-buy');
+  el.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="results-title">Purchase Cost Breakdown</div>
+        <div class="results-subtitle">Cash vs CPF-OA split — purchase price ${fmt(price)}</div>
+      </div>
+    </div>
+
+    <div class="summary-strip">
+      <div class="sum-card highlight">
+        <div class="sum-label">Total Outlay</div>
+        <div class="sum-value">${fmt(grandTotal)}</div>
+        <div class="sum-note">Cash + CPF combined</div>
+      </div>
+      <div class="sum-card" style="border-left:4px solid #1B4B7A">
+        <div class="sum-label" style="color:#1B4B7A">💵 Cash Required</div>
+        <div class="sum-value" style="color:#1B4B7A">${fmt(totalCash)}</div>
+        <div class="sum-note">Min. cash you must have</div>
+      </div>
+      <div class="sum-card" style="border-left:4px solid #1B7A4B">
+        <div class="sum-label" style="color:#1B7A4B">🏦 CPF-OA Used</div>
+        <div class="sum-value" style="color:#1B7A4B">${fmt(totalCPF)}</div>
+        <div class="sum-note">From your CPF-OA account</div>
+      </div>
+      <div class="sum-card ${absd > 0 ? 'warn' : 'good'}">
+        <div class="sum-label">ABSD</div>
+        <div class="sum-value">${absd > 0 ? fmt(absd) : 'Nil'}</div>
+        <div class="sum-note">${absd > 0 ? absdRate.toFixed(2)+'% rate' : 'Not applicable'}</div>
+      </div>
+    </div>
+
+    ${absd > 0 ? `<div class="absd-warning">⚠️ <strong>ABSD of ${fmt(absd)} (${absdRate.toFixed(2)}%)</strong> must be paid in <strong>cash within 14 days</strong> of signing S&amp;P Agreement. You may apply for CPF reimbursement afterwards. SC married couples may apply for ABSD remission — consult your lawyer.</div>` : ''}
+
+    ${hasInputFunds && cashShortfall > 0 ? `<div class="shortfall-box">⚠️ <strong>Cash shortfall of ${fmt(cashShortfall)}.</strong> Your available cash (${fmt(cashAvail)}) is insufficient. You need an additional ${fmt(cashShortfall)} in cash to proceed.</div>` : ''}
+    ${hasInputFunds && cpfShortfall > 0 ? `<div class="shortfall-box">⚠️ <strong>CPF-OA shortfall of ${fmt(cpfShortfall)}.</strong> Not enough CPF-OA to cover CPF-eligible items. The ${fmt(cpfShortfall)} gap must be covered by additional cash.</div>` : ''}
+    ${hasInputFunds && cashShortfall === 0 && cpfShortfall === 0 ? `<div class="surplus-box">✅ <strong>You have sufficient funds.</strong> Cash surplus: ${fmt(cashSurplus)} | CPF-OA surplus: ${fmt(cpfSurplus)}. You are well-positioned to proceed.</div>` : ''}
+
+    ${hasInputFunds ? `
+    <div class="breakdown-section">
+      <div class="breakdown-head">📊 Funds Utilisation</div>
+      <div style="padding:14px 18px">
+        <div class="fund-bar-wrap">
+          <div class="fund-bar-label">
+            <span>💵 Cash: ${fmt(Math.min(cashAvail,totalCash))} of ${fmt(cashAvail)} used</span>
+            <span>🏦 CPF-OA: ${fmt(Math.min(cpfAvail,totalCPF))} of ${fmt(cpfAvail)} used</span>
+          </div>
+          <div class="fund-bar">
+            <div class="fund-bar-cash" style="width:${barCashW}%"></div>
+            <div class="fund-bar-cpf"  style="width:${barCpfW}%"></div>
+            <div class="fund-bar-short" style="width:${barShortW}%"></div>
+          </div>
+          <div class="fund-legend">
+            <span><span class="legend-dot" style="background:#1B4B7A"></span>Cash used</span>
+            <span><span class="legend-dot" style="background:#1B7A4B"></span>CPF-OA used</span>
+            ${barShortW > 0 ? `<span><span class="legend-dot" style="background:#C8102E"></span>Shortfall</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">💳 Cash vs CPF-OA Split — Full Breakdown</div>
+      <table class="split-table">
+        <thead>
+          <tr>
+            <th style="width:44%">Cost Item</th>
+            <th class="cash-col">💵 Cash</th>
+            <th class="cpf-col">🏦 CPF-OA</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${splitRow(`Downpayment (${fmt(downpayment)}) — min ${(minCashPct*100).toFixed(2)}% cash`, cashForDown, cpfForDown, 'both')}
+          <tr><td colspan="4" class="note-row">LTV: ${buyType==='hdb'?'80% (HDB loan) — CPF can cover most of downpayment':propCount===0?'75% bank loan — min 5% cash, balance CPF-OA':propCount===1?'55% bank loan — min 25% cash, balance CPF-OA':'35% bank loan — min 25% cash, balance CPF-OA'}</td></tr>
+          ${splitRow('Buyer\'s Stamp Duty (BSD)', cashForBSD, cpfForBSD, 'both')}
+          <tr><td colspan="4" class="note-row">Pay cash first within 14 days; apply for CPF-OA reimbursement upon completion.</td></tr>
+          ${absd > 0 ? splitRow('Additional Buyer\'s Stamp Duty (ABSD)', cashForABSD, cpfForABSD, 'both') : ''}
+          ${absd > 0 ? `<tr><td colspan="4" class="note-row">Pay cash first; CPF-OA reimbursement can be applied for after payment.</td></tr>` : ''}
+          ${splitRow('Legal / Conveyancing Fees', cashForLegal, cpfForLegal, 'cpf')}
+          <tr><td colspan="4" class="note-row">CPF-OA can be used directly for conveyancing legal fees.</td></tr>
+          ${splitRow('Valuation / Appraisal Fee', cashForVal, 0, 'cash')}
+          ${totalComm > 0 ? splitRow(`Buyer Agent Commission (${commRate}%) + GST`, cashForComm, 0, 'cash') : ''}
+          ${splitRow('Home Insurance', cashForIns, 0, 'cash')}
+          ${reno > 0 ? splitRow('Renovation Budget', cashForReno, 0, 'cash') : ''}
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td><strong>TOTAL</strong></td>
+            <td class="cash-val">${fmt(totalCash)}</td>
+            <td class="cpf-val">${fmt(totalCPF)}</td>
+            <td><strong>${fmt(grandTotal)}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="note-row" style="border-top:1px dashed var(--border)">
+        <strong>CPF-OA allocation shown above assumes maximum CPF usage.</strong> You may choose to use less CPF and more cash if preferred. CPF usage for downpayment reduces future CPF available for mortgage instalment payments — factor this into your monthly cash-flow planning.
+      </div>
+    </div>
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">🏷️ Stamp Duty Detail (BSD Tier Breakdown)</div>
+      <div class="breakdown-row"><span class="row-label">First S$180,000 @ 1%</span><span class="row-value">${fmt(Math.min(price,180000)*0.01)}</span></div>
+      ${price > 180000 ? `<div class="breakdown-row"><span class="row-label">Next S$180,000 @ 2%</span><span class="row-value">${fmt(Math.min(price-180000,180000)*0.02)}</span></div>` : ''}
+      ${price > 360000 ? `<div class="breakdown-row"><span class="row-label">Next S$640,000 @ 3%</span><span class="row-value">${fmt(Math.min(price-360000,640000)*0.03)}</span></div>` : ''}
+      ${price > 1000000 ? `<div class="breakdown-row"><span class="row-label">Next S$500,000 @ 4%</span><span class="row-value">${fmt(Math.min(price-1000000,500000)*0.04)}</span></div>` : ''}
+      ${price > 1500000 ? `<div class="breakdown-row"><span class="row-label">Next S$1,500,000 @ 5%</span><span class="row-value">${fmt(Math.min(price-1500000,1500000)*0.05)}</span></div>` : ''}
+      ${price > 3000000 ? `<div class="breakdown-row"><span class="row-label">Remainder @ 6%</span><span class="row-value">${fmt((price-3000000)*0.06)}</span></div>` : ''}
+      <div class="breakdown-total"><span>Total BSD</span><span>${fmt(bsd)}</span></div>
+      ${absd > 0 ? `<div class="breakdown-row" style="padding:11px 18px"><span class="row-label">ABSD (${absdRate.toFixed(2)}% on full price)</span><span class="row-value">${fmt(absd)}</span></div>` : ''}
+    </div>
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">📅 Payment Timeline</div>
+      <div class="note-row"><strong>OTP Grant:</strong> Option Fee (typically 1% of price) — <span class="split-tag tag-cash">Cash only</span></div>
+      <div class="note-row"><strong>OTP Exercise (within 21 days):</strong> 4% exercise fee — <span class="split-tag tag-cash">Cash only</span>. These 5% together = minimum cash downpayment.</div>
+      <div class="note-row"><strong>Within 14 days of S&amp;P:</strong> BSD and ABSD must be paid — <span class="split-tag tag-cash">Cash first</span>, CPF reimbursement later.</div>
+      <div class="note-row"><strong>On Completion:</strong> Balance downpayment (CPF-OA + cash), legal fees, valuation, commission settled.</div>
+    </div>
+
+    ${loanType !== 'none' ? `
+    <div class="breakdown-section">
+      <div class="breakdown-head">🏦 Loan Tenure &amp; Eligibility</div>
+
+      <div class="breakdown-row">
+        <span class="row-label">Loan Type</span>
+        <span class="row-value">${loanType === 'bank' ? 'Bank Loan' : 'HDB Concessionary Loan'}</span>
+      </div>
+      <div class="breakdown-row">
+        <span class="row-label">Loan Amount</span>
+        <span class="row-value">${fmt(loanAmt)}</span>
+      </div>
+      ${age ? `<div class="breakdown-row">
+        <span class="row-label">Borrower Age (Youngest)</span>
+        <span class="row-value">${age} years old</span>
+      </div>` : ''}
+      ${maxTenure !== null ? `<div class="breakdown-row">
+        <span class="row-label">Maximum Allowed Tenure</span>
+        <span class="row-value ${tenure > maxTenure ? 'deduct' : ''}">${maxTenure} years ${tenure > maxTenure ? '⚠️ (your input of '+tenure+' yrs exceeds this)' : ''}</span>
+      </div>` : ''}
+      <div class="breakdown-row">
+        <span class="row-label">Effective Loan Tenure</span>
+        <span class="row-value">${effectiveTen} years</span>
+      </div>
+      ${ageAtEnd ? `<div class="breakdown-row">
+        <span class="row-label">Age at Loan End</span>
+        <span class="row-value ${ageAtEnd > (loanType==='bank' && buyType!=='hdb' ? POLICY.loanLimits.bank.private.maxAgeAtEnd : POLICY.loanLimits.bank.hdb.maxAgeAtEnd) ? 'deduct' : ''}">${ageAtEnd} years old</span>
+      </div>` : ''}
+
+      <div class="note-row" style="margin-top:2px">
+        <strong>Tenure Rules (MAS):</strong>
+        ${loanType === 'bank' && buyType !== 'hdb'
+          ? `Private property bank loan: max ${POLICY.loanLimits.bank.private.maxTenure} years, loan must end by age ${POLICY.loanLimits.bank.private.maxAgeAtEnd}.`
+          : loanType === 'bank' && buyType === 'hdb'
+          ? `HDB flat bank loan: max ${POLICY.loanLimits.bank.hdb.maxTenure} years, loan must end by age ${POLICY.loanLimits.bank.hdb.maxAgeAtEnd}.`
+          : `HDB concessionary loan: max ${POLICY.loanLimits.hdbLoan.hdb.maxTenure} years, loan must end by age ${POLICY.loanLimits.hdbLoan.hdb.maxAgeAtEnd}.`}
+        ${lease < 60 ? ` Leasehold tenure further capped: remaining lease (${lease} yrs) − ${POLICY.loanLimits.leaseDecayMinRemaining} = ${Math.max(0,lease-POLICY.loanLimits.leaseDecayMinRemaining)} yrs max.` : ''}
+      </div>
+
+      ${!leaseCovers95 && age ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">
+        ⚠️ <strong>Lease Coverage Warning:</strong> Remaining lease of ${lease} years does not cover the youngest buyer (age ${age}) to age ${POLICY.loanLimits.cpfLeaseToAge}. CPF Board may restrict or prorate CPF usage for this property.
+      </div>` : ''}
+
+      <div id="live-affordability">
+        ${buildAffordabilityHTML(monthly, intRate, effectiveTen, tdsr ?? 0, msr ?? 0, tdsrBreached, msrBreached, maxLoanTDSR ?? 0, income, (POLICY.tdsr.limit*100).toFixed(0), (POLICY.msr.limit*100).toFixed(0), isHdbEc)}
+      </div>
+    </div>` : ''}
+
+    <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> CPF allocation shown assumes maximum permissible CPF-OA usage. Actual CPF usage subject to CPF Board's Valuation Limit and Withdrawal Limit rules. BSD/ABSD rates per IRAS as of April 2026. Loan tenure limits per MAS Notice 645 / HDB rules. TDSR/MSR computed on gross income; lenders may apply stress-test rates. Consult your conveyancing lawyer, CPF Board and bank for exact eligibility.</div>
+  `;
+}
+
+// ─── COMBINED CALCULATION ─────────────────────────────────────────
+function calcCombined() {
+  // Pull values from both tabs
+  const sellPrice    = parseFloat(document.getElementById('sell-price').value) || 0;
+  const buyPrice     = parseFloat(document.getElementById('buy-price').value) || 0;
+
+  if (!sellPrice || !buyPrice) {
+    alert('Please fill in both the Selling and Buying tabs first, then come here.');
+    return;
+  }
+
+  // Run both calcs silently
+  calcSell();
+  calcBuy();
+
+  // Re-gather for combined
+  const loan        = parseFloat(document.getElementById('sell-loan').value) || 0;
+  const cpf         = parseFloat(document.getElementById('sell-cpf').value) || 0;
+  const commRate    = parseFloat(document.getElementById('sell-commission').value) || 0;
+  const sellComm    = Math.round(sellPrice * commRate / 100);
+  const sellCommGST = Math.round(sellComm * POLICY.cpf.gstOnCommission);
+  const sellLegal   = parseFloat(document.getElementById('sell-legal').value) || 0;
+  const redemption  = parseFloat(document.getElementById('sell-redemption').value) || 0;
+  const lockin      = document.getElementById('sell-lockin').checked;
+  const levyOn      = document.getElementById('sell-levy').checked;
+  const levyAmt     = parseFloat(document.getElementById('sell-levy-amt').value) || 0;
+  const misc        = parseFloat(document.getElementById('sell-misc').value) || 0;
+  const era         = document.getElementById('sell-ssd-era').value;
+  const yearsHeld   = document.querySelector('input[name="sell-years"]:checked')?.value || '4';
+  const ssd         = calcSSD(sellPrice, era, yearsHeld);
+  const lockInPenalty = lockin ? Math.round(loan * 0.015) : 0;
+  const levy        = levyOn ? levyAmt : 0;
+  const sellTotalDed = loan + cpf + sellComm + sellCommGST + sellLegal + redemption + lockInPenalty + levy + misc + ssd;
+  const netCash     = sellPrice - sellTotalDed;
+
+  const citizenship  = document.getElementById('buy-citizenship').value;
+  const propCount    = parseInt(document.querySelector('input[name="buy-props"]:checked')?.value || '0');
+  const buyLoan      = parseFloat(document.getElementById('buy-loan').value) || 0;
+  const buyValuation = parseFloat(document.getElementById('buy-valuation').value) || 0;
+  const buyCommRate  = parseFloat(document.getElementById('buy-commission').value) || 0;
+  const buyComm      = Math.round(buyPrice * buyCommRate / 100);
+  const buyCommGST   = Math.round(buyComm * POLICY.cpf.gstOnCommission);
+  const buyLegal     = parseFloat(document.getElementById('buy-legal').value) || 0;
+  const insurance    = parseFloat(document.getElementById('buy-insurance').value) || 0;
+  const reno         = parseFloat(document.getElementById('buy-reno').value) || 0;
+  const bridging     = parseFloat(document.getElementById('bridging').value) || 0;
+  const seq          = document.getElementById('seq').value;
+
+  const bsd = calcBSD(buyPrice);
+  const absd = calcABSD(buyPrice, citizenship, propCount);
+  const downpayment = buyPrice - buyLoan;
+  const totalBuyCost = downpayment + bsd + absd + buyComm + buyCommGST + buyLegal + buyValuation + insurance + reno;
+
+  const cashSurplus = netCash - totalBuyCost;
+  const bridgingAdj = seq === 'buy-first' ? bridging : 0;
+
+  const el = document.getElementById('result-combined');
+  el.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="results-title">Complete Financial Picture</div>
+        <div class="results-subtitle">Selling ${fmt(sellPrice)} → Buying ${fmt(buyPrice)}</div>
+      </div>
+    </div>
+
+    <div class="summary-strip">
+      <div class="sum-card highlight">
+        <div class="sum-label">Net Position</div>
+        <div class="sum-value">${fmt(Math.abs(cashSurplus - bridgingAdj))}</div>
+        <div class="sum-note">${cashSurplus - bridgingAdj >= 0 ? '✅ Cash surplus after all costs' : '⚠️ Additional cash needed'}</div>
+      </div>
+      <div class="sum-card good">
+        <div class="sum-label">Sale Net Cash</div>
+        <div class="sum-value">${fmt(netCash)}</div>
+        <div class="sum-note">from selling</div>
+      </div>
+      <div class="sum-card ${absd>0?'warn':''}">
+        <div class="sum-label">Total Buy Outlay</div>
+        <div class="sum-value">${fmt(totalBuyCost)}</div>
+        <div class="sum-note">incl. ${absd>0?'ABSD '+fmt(absd):'no ABSD'}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">Total Stamp Duties</div>
+        <div class="sum-value">${fmt(bsd + absd + ssd)}</div>
+        <div class="sum-note">BSD + ABSD + SSD</div>
+      </div>
+    </div>
+
+    ${absd > 0 && seq === 'sell-first' ? `<div class="absd-warning">💡 <strong>Strategy Tip:</strong> By selling first and ensuring your current property is fully disposed of before purchasing, you may qualify to purchase the new property as a first/lower-count property, <strong>potentially reducing ABSD</strong>. Consult your lawyer to time the transactions correctly.</div>` : ''}
+    ${seq === 'buy-first' ? `<div class="absd-warning">💡 If buying before selling: SC couples may pay ABSD upfront and claim a <strong>remission refund</strong> if the current property is sold within <strong>6 months</strong> of TOP (new) or completion (resale). Conditions apply. Bridging loan interest has been factored in where provided.</div>` : ''}
+
+    <div class="combined-grid">
+      <div class="combined-col">
+        <h3>🏠 Selling Side</h3>
+        <div class="breakdown-section">
+          <div class="breakdown-row"><span class="row-label">Gross Sale Price</span><span class="row-value">${fmt(sellPrice)}</span></div>
+          <div class="breakdown-row"><span class="row-label">Loan Repayment</span><span class="row-value deduct">− ${fmt(loan)}</span></div>
+          <div class="breakdown-row"><span class="row-label">CPF Refund</span><span class="row-value deduct">− ${fmt(cpf)}</span></div>
+          <div class="breakdown-row"><span class="row-label">Agent Comm. + GST</span><span class="row-value deduct">− ${fmt(sellComm+sellCommGST)}</span></div>
+          <div class="breakdown-row"><span class="row-label">Legal Fees</span><span class="row-value deduct">− ${fmt(sellLegal)}</span></div>
+          ${ssd>0?`<div class="breakdown-row"><span class="row-label">SSD</span><span class="row-value deduct">− ${fmt(ssd)}</span></div>`:''}
+          ${lockInPenalty>0?`<div class="breakdown-row"><span class="row-label">Lock-in Penalty</span><span class="row-value deduct">− ${fmt(lockInPenalty)}</span></div>`:''}
+          ${levy>0?`<div class="breakdown-row"><span class="row-label">Resale Levy</span><span class="row-value deduct">− ${fmt(levy)}</span></div>`:''}
+          <div class="breakdown-row"><span class="row-label">Other (tax, misc)</span><span class="row-value deduct">− ${fmt(misc+redemption)}</span></div>
+          <div class="breakdown-total"><span>Net Cash from Sale</span><span>${fmt(netCash)}</span></div>
+        </div>
+      </div>
+
+      <div class="combined-col">
+        <h3>🔑 Buying Side</h3>
+        <div class="breakdown-section">
+          <div class="breakdown-row"><span class="row-label">Purchase Price</span><span class="row-value">${fmt(buyPrice)}</span></div>
+          <div class="breakdown-row"><span class="row-label">Downpayment (excl. loan)</span><span class="row-value">${fmt(downpayment)}</span></div>
+          <div class="breakdown-row"><span class="row-label">BSD</span><span class="row-value">${fmt(bsd)}</span></div>
+          <div class="breakdown-row"><span class="row-label">ABSD</span><span class="row-value ${absd>0?'deduct':'zero'}">${absd>0?fmt(absd):'Nil'}</span></div>
+          <div class="breakdown-row"><span class="row-label">Legal + Valuation</span><span class="row-value">${fmt(buyLegal+buyValuation)}</span></div>
+          ${buyComm>0?`<div class="breakdown-row"><span class="row-label">Buyer Agent Comm. + GST</span><span class="row-value">${fmt(buyComm+buyCommGST)}</span></div>`:''}
+          <div class="breakdown-row"><span class="row-label">Insurance</span><span class="row-value">${fmt(insurance)}</span></div>
+          ${reno>0?`<div class="breakdown-row"><span class="row-label">Renovation</span><span class="row-value">${fmt(reno)}</span></div>`:''}
+          ${bridgingAdj>0?`<div class="breakdown-row"><span class="row-label">Bridging Loan Interest</span><span class="row-value deduct">− ${fmt(bridgingAdj)}</span></div>`:''}
+          <div class="breakdown-total"><span>Total Buy Outlay</span><span>${fmt(totalBuyCost + bridgingAdj)}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="net-highlight">
+      <div>
+        <div class="label">NET POSITION (Sale Proceeds minus Buy Costs)</div>
+        <div class="sum-note" style="opacity:0.6;margin-top:4px">Positive = surplus cash; Negative = additional cash needed</div>
+      </div>
+      <div class="amount">${cashSurplus - bridgingAdj >= 0 ? '+' : '−'}${fmt(Math.abs(cashSurplus - bridgingAdj))}</div>
+    </div>
+
+    <div class="breakdown-section">
+      <div class="breakdown-head">📊 All Taxes &amp; Duties Summary</div>
+      <div class="breakdown-row"><span class="row-label">Seller's Stamp Duty (SSD)</span><span class="row-value ${ssd>0?'deduct':'zero'}">${ssd>0?fmt(ssd):'Nil'}</span></div>
+      <div class="breakdown-row"><span class="row-label">Buyer's Stamp Duty (BSD)</span><span class="row-value">${fmt(bsd)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Additional Buyer's Stamp Duty (ABSD)</span><span class="row-value ${absd>0?'deduct':'zero'}">${absd>0?fmt(absd):'Nil'}</span></div>
+      <div class="breakdown-total"><span>Total Government Taxes &amp; Duties</span><span>${fmt(bsd + absd + ssd)}</span></div>
+    </div>
+
+    <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Estimates only. Actual figures depend on final agreed prices, bank valuations, exact CPF accrued interest, and lawyer's fees. ABSD rates: IRAS schedule effective Apr 2023. SSD extended to 4-year holding for properties purchased on/after 4 Jul 2025. BSD rates effective Feb 2023. Verify all figures with your conveyancing lawyer and the IRAS e-Stamping portal before transacting.</div>
+  `;
+}
+
+// ─── TOGGLE HELPERS ───────────────────────────────────────────────
+document.getElementById('sell-levy').addEventListener('change', function() {
+  document.getElementById('levy-field').style.display = this.checked ? 'block' : 'none';
+});
+
+document.getElementById('sell-ssd-era').addEventListener('change', function() {
+  document.getElementById('ssd-year-field').style.display = this.value === 'hdb' ? 'none' : 'block';
+});
+
+// ─── PERSISTENCE & SCENARIO MANAGER ──────────────────────────────
+const SCENARIOS_KEY = 'sg_prop_scenarios_v1';
+const CURRENT_KEY   = 'sg_prop_current_v1';
+const APP_VERSION   = '2026.08.14';
+
+const FIELDS = [
+  { id: 'sell-price',      type: 'number' },
+  { id: 'sell-loan',       type: 'number' },
+  { id: 'sell-cpf',        type: 'number' },
+  { id: 'sell-commission', type: 'number' },
+  { id: 'sell-legal',      type: 'number' },
+  { id: 'sell-redemption', type: 'number' },
+  { id: 'sell-levy-amt',   type: 'number' },
+  { id: 'sell-misc',       type: 'number' },
+  { id: 'sell-ssd-era',    type: 'select' },
+  { id: 'sell-lockin',     type: 'checkbox' },
+  { id: 'sell-levy',       type: 'checkbox' },
+  { id: 'buy-price',       type: 'number' },
+  { id: 'buy-loan',        type: 'number' },
+  { id: 'buy-age',         type: 'number' },
+  { id: 'buy-tenure',      type: 'number' },
+  { id: 'buy-lease',       type: 'number' },
+  { id: 'buy-income',      type: 'number' },
+  { id: 'buy-debt',        type: 'number' },
+  { id: 'buy-rate',        type: 'number' },
+  { id: 'buy-valuation',   type: 'number' },
+  { id: 'buy-commission',  type: 'number' },
+  { id: 'buy-legal',       type: 'number' },
+  { id: 'buy-insurance',   type: 'number' },
+  { id: 'buy-reno',        type: 'number' },
+  { id: 'buy-cpf-avail',   type: 'number' },
+  { id: 'buy-cash-avail',  type: 'number' },
+  { id: 'buy-citizenship', type: 'select' },
+  { id: 'bridging',        type: 'number' },
+  { id: 'seq',             type: 'select' },
+];
+const RADIO_GROUPS = ['sell-type','sell-years','buy-type','buy-props','loan-type'];
+
+function isSecurePersistableOrigin() {
+  const p = location.protocol;
+  return p === 'https:' || p === 'http:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
+
+function storageProbe() {
+  try {
+    const k = '__sg_prop_probe__';
+    localStorage.setItem(k, '1');
+    localStorage.removeItem(k);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function updateStorageUI() {
+  const pill = document.getElementById('storage-pill');
+  const banner = document.getElementById('storage-banner');
+  const ok = storageProbe();
+  const durable = isSecurePersistableOrigin() && ok;
+  if (pill) {
+    pill.textContent = durable ? 'Saved on this device' : 'Not durable here';
+    pill.className = 'storage-pill ' + (durable ? 'ok' : 'warn');
+    pill.title = durable
+      ? 'Scenarios stay in this browser on this device. Use Export / Share / Import to move them across phones and PCs.'
+      : 'Opened as a local file or blocked storage. Use the hosted HTTPS link for reliable saves.';
+  }
+  if (banner) {
+    if (!durable) {
+      banner.classList.add('show');
+      banner.innerHTML = '⚠️ <strong>Saves will not stick</strong> in this open mode (local file / restricted storage). ' +
+        'Open the <strong>hosted web link</strong> (and on iPhone: Share → Add to Home Screen). ' +
+        'Until then: <strong>Export</strong> before leaving, then <strong>Import</strong> later.';
+    } else {
+      banner.classList.remove('show');
+      banner.innerHTML = '';
+    }
+  }
+  const hint = document.getElementById('install-hint');
+  if (hint && durable && /iPhone|iPad|Macintosh|Android/i.test(navigator.userAgent)) {
+    hint.classList.add('show');
+  }
+}
+
+function captureSnapshot() {
+  const data = {};
+  FIELDS.forEach(({ id, type }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    data[id] = type === 'checkbox' ? el.checked : el.value;
+  });
+  RADIO_GROUPS.forEach(name => {
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    if (checked) data['radio_' + name] = checked.value;
+  });
+  return data;
+}
+
+function applySnapshot(data) {
+  if (!data) return;
+  FIELDS.forEach(({ id, type }) => {
+    const el = document.getElementById(id);
+    if (!el || data[id] === undefined) return;
+    if (type === 'checkbox') el.checked = !!data[id];
+    else el.value = data[id];
+  });
+  RADIO_GROUPS.forEach(name => {
+    const val = data['radio_' + name];
+    if (!val) return;
+    const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+    if (radio) radio.checked = true;
+  });
+  const levy = document.getElementById('sell-levy');
+  const levyField = document.getElementById('levy-field');
+  if (levy && levyField) levyField.style.display = levy.checked ? 'block' : 'none';
+  const ssd = document.getElementById('sell-ssd-era');
+  const ssdField = document.getElementById('ssd-year-field');
+  if (ssd && ssdField) ssdField.style.display = ssd.value === 'hdb' ? 'none' : 'block';
+  if (typeof updateLoanRules === 'function') updateLoanRules();
+  try {
+    if (typeof calcSell === 'function') calcSell();
+    if (typeof calcBuy === 'function') calcBuy();
+    if (typeof calcCombined === 'function') calcCombined();
+  } catch (e) {}
+}
+
+function loadScenarios() {
+  try { return JSON.parse(localStorage.getItem(SCENARIOS_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveScenarios(scenarios) {
+  try {
+    localStorage.setItem(SCENARIOS_KEY, JSON.stringify(scenarios));
+    return true;
+  } catch(e) {
+    showToast('⚠️ Could not save — storage blocked. Use Export.');
+    return false;
+  }
+}
+function saveCurrentState() {
+  try {
+    localStorage.setItem(CURRENT_KEY, JSON.stringify({ data: captureSnapshot(), activeId: activeScenarioId, ts: Date.now() }));
+  } catch(e) {}
+}
+
+let activeScenarioId = null;
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderChips() {
+  const scenarios = loadScenarios();
+  const chips = document.getElementById('scenario-chips');
+  const nameDisplay = document.getElementById('active-name-display');
+  chips.innerHTML = '';
+  const ids = Object.keys(scenarios).sort((a,b) => (scenarios[a].savedAt||0) - (scenarios[b].savedAt||0));
+  if (ids.length === 0) {
+    chips.innerHTML = '<span style="font-size:0.76rem;color:#44446A;font-style:italic">No saved scenarios yet — fill in values and click Save</span>';
+  }
+  ids.forEach(id => {
+    const sc = scenarios[id];
+    const chip = document.createElement('div');
+    chip.className = 'scenario-chip' + (id === activeScenarioId ? ' active' : '');
+    const safeName = escapeHtml(sc.name || 'Untitled');
+    chip.innerHTML = `<span class="chip-name" title="${safeName}" onclick="loadScenario('${id}')">${safeName}</span><span class="chip-del" title="Delete" onclick="deleteScenario(event,'${id}')">✕</span>`;
+    chips.appendChild(chip);
+  });
+  if (activeScenarioId && scenarios[activeScenarioId]) {
+    nameDisplay.innerHTML = `Editing: <strong>${escapeHtml(scenarios[activeScenarioId].name)}</strong>`;
+  } else {
+    nameDisplay.innerHTML = ids.length > 0 ? '<span style="color:#555577">Unsaved scenario</span>' : '';
+  }
+}
+
+function newScenario() {
+  activeScenarioId = null;
+  FIELDS.forEach(({ id, type }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (type === 'checkbox') el.checked = false;
+    else if (type === 'select') el.selectedIndex = 0;
+    else el.value = '';
+  });
+  RADIO_GROUPS.forEach(name => {
+    const first = document.querySelector(`input[name="${name}"]`);
+    if (first) first.checked = true;
+  });
+  const levyField = document.getElementById('levy-field');
+  const ssdField = document.getElementById('ssd-year-field');
+  if (levyField) levyField.style.display = 'none';
+  if (ssdField) ssdField.style.display = 'block';
+  if (typeof updateLoanRules === 'function') updateLoanRules();
+  saveCurrentState();
+  renderChips();
+  showToast('Started a new blank scenario');
+}
+
+function openSaveModal() {
+  const scenarios = loadScenarios();
+  const existing = activeScenarioId && scenarios[activeScenarioId];
+  document.getElementById('modal-title').textContent = existing ? 'Save / Rename Scenario' : 'Save Scenario';
+  document.getElementById('modal-desc').textContent = existing
+    ? `Currently editing "${existing.name}". Update it or enter a new name to save as a copy.`
+    : 'Give this set of calculations a name so you can return to it later on this device.';
+  document.getElementById('modal-name-input').value = existing ? existing.name : '';
+  document.getElementById('save-modal').classList.add('open');
+  setTimeout(() => document.getElementById('modal-name-input').focus(), 80);
+}
+
+function confirmSave() {
+  const name = document.getElementById('modal-name-input').value.trim();
+  if (!name) { document.getElementById('modal-name-input').style.borderColor='#C8102E'; return; }
+  document.getElementById('modal-name-input').style.borderColor='';
+  const scenarios = loadScenarios();
+  const matchId = Object.keys(scenarios).find(id => id !== activeScenarioId && scenarios[id].name === name);
+  const targetId = matchId || activeScenarioId || ('sc_' + Date.now());
+  scenarios[targetId] = {
+    name,
+    data: captureSnapshot(),
+    savedAt: Date.now(),
+    appVersion: APP_VERSION,
+  };
+  if (!saveScenarios(scenarios)) return;
+  activeScenarioId = targetId;
+  saveCurrentState();
+  closeModal('save-modal');
+  renderChips();
+  updateStorageUI();
+  showToast(`✓ Saved as "${name}"`);
+}
+
+function loadScenario(id) {
+  const scenarios = loadScenarios();
+  if (!scenarios[id]) return;
+  activeScenarioId = id;
+  applySnapshot(scenarios[id].data);
+  saveCurrentState();
+  renderChips();
+  showToast(`Loaded "${scenarios[id].name}"`);
+}
+
+function deleteScenario(e, id) {
+  e.stopPropagation();
+  const scenarios = loadScenarios();
+  const name = scenarios[id]?.name || 'this scenario';
+  if (!confirm(`Delete "${name}"?`)) return;
+  delete scenarios[id];
+  saveScenarios(scenarios);
+  if (activeScenarioId === id) activeScenarioId = null;
+  saveCurrentState();
+  renderChips();
+  showToast(`Deleted "${name}"`);
+}
+
+function exportAll() {
+  const scenarios = loadScenarios();
+  const ids = Object.keys(scenarios);
+  if (ids.length === 0) { showToast('No saved scenarios to export'); return; }
+  const payload = {
+    format: 'sg-property-calculator-scenarios',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    appVersion: APP_VERSION,
+    scenarios,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sg-property-scenarios.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(`Exported ${ids.length} scenario${ids.length>1?'s':''}`);
+}
+
+function normalizeImportedScenarios(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  if (raw.scenarios && typeof raw.scenarios === 'object') return raw.scenarios;
+  if (raw.data && (raw.name || raw.savedAt)) {
+    const id = 'sc_import_' + Date.now();
+    return { [id]: { name: raw.name || 'Imported', data: raw.data, savedAt: raw.savedAt || Date.now() } };
+  }
+  const keys = Object.keys(raw);
+  if (keys.length && keys.every(k => raw[k] && raw[k].data)) return raw;
+  return null;
+}
+
+function importScenarios(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const incoming = normalizeImportedScenarios(parsed);
+      if (!incoming) throw new Error('Unrecognized file format');
+      const existing = loadScenarios();
+      let added = 0, updated = 0;
+      Object.keys(incoming).forEach(id => {
+        const sc = incoming[id];
+        if (!sc || !sc.data) return;
+        const byName = Object.keys(existing).find(k => existing[k].name === sc.name);
+        const target = byName || ('sc_imp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
+        if (existing[target] || byName) updated++; else added++;
+        existing[target] = {
+          name: sc.name || 'Imported scenario',
+          data: sc.data,
+          savedAt: Date.now(),
+          appVersion: APP_VERSION,
+        };
+      });
+      if (!saveScenarios(existing)) return;
+      renderChips();
+      updateStorageUI();
+      showToast(`Import done: ${added} new, ${updated} updated`);
+    } catch (err) {
+      console.error(err);
+      showToast('Import failed — use a scenarios JSON export');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function toBase64Url(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
+}
+function fromBase64Url(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function shareActiveScenario() {
+  const scenarios = loadScenarios();
+  const name = (activeScenarioId && scenarios[activeScenarioId]?.name) || 'Shared scenario';
+  const payload = { v: 1, name, data: captureSnapshot(), ts: Date.now() };
+  let encoded;
+  try {
+    encoded = toBase64Url(JSON.stringify(payload));
+  } catch (e) {
+    showToast('Could not encode share link');
+    return;
+  }
+  const base = location.href.split('#')[0];
+  const url = base + '#sc=' + encoded;
+  if (url.length > 18000) {
+    showToast('Scenario too large for a link — use Export instead');
+    return;
+  }
+  if (navigator.share && /Mobi|iPhone|iPad|Android/i.test(navigator.userAgent)) {
+    navigator.share({ title: 'SG Property: ' + name, url })
+      .then(() => showToast('Share sheet opened'))
+      .catch(() => copyText(url).then(() => showToast('Link copied')));
+  } else {
+    copyText(url).then(() => showToast('Share link copied — open on any device'));
+  }
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); resolve(); } catch (e) { reject(e); }
+    ta.remove();
+  });
+}
+
+function tryLoadSharedFromHash() {
+  const hash = location.hash || '';
+  const m = hash.match(/^#sc=([\w\-]+)/);
+  if (!m) return false;
+  try {
+    const payload = JSON.parse(fromBase64Url(m[1]));
+    if (!payload || !payload.data) return false;
+    applySnapshot(payload.data);
+    activeScenarioId = null;
+    saveCurrentState();
+    renderChips();
+    const nm = payload.name || 'Shared scenario';
+    showToast('Opened shared: ' + nm);
+    setTimeout(() => {
+      if (confirm(`Save shared scenario "${nm}" to this device?`)) {
+        const scenarios = loadScenarios();
+        const id = 'sc_' + Date.now();
+        scenarios[id] = { name: nm, data: captureSnapshot(), savedAt: Date.now(), appVersion: APP_VERSION };
+        if (saveScenarios(scenarios)) {
+          activeScenarioId = id;
+          saveCurrentState();
+          renderChips();
+          showToast('Saved shared scenario');
+        }
+      }
+      history.replaceState(null, '', location.pathname + location.search);
+    }, 400);
+    return true;
+  } catch (e) {
+    console.error('Bad share link', e);
+    showToast('Could not open share link');
+    return false;
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal('save-modal');
+    closeModal('load-modal');
+    const pm = document.getElementById('policy-modal');
+    if (pm) pm.classList.remove('open');
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('save-modal').classList.contains('open')) confirmSave();
+});
+document.getElementById('save-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('save-modal');
+});
+
+function attachSaveListeners() {
+  FIELDS.forEach(({ id }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', saveCurrentState);
+    if (el.tagName === 'INPUT' && el.type !== 'checkbox') el.addEventListener('input', saveCurrentState);
+  });
+  RADIO_GROUPS.forEach(name => {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.addEventListener('change', saveCurrentState));
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveCurrentState();
+  });
+  window.addEventListener('pagehide', saveCurrentState);
+  window.addEventListener('beforeunload', saveCurrentState);
+}
+
+function showToast(msg) {
+  const old = document.getElementById('sc-toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'sc-toast';
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:22px;right:22px;left:22px;margin:auto;max-width:420px;background:#1A1A2E;color:#fff;padding:11px 16px;border-radius:10px;font-size:0.82rem;font-family:DM Sans,sans-serif;opacity:0;transition:opacity 0.25s;z-index:2000;pointer-events:none;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25)';
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; });
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 350); }, 2600);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  updateStorageUI();
+  const fromShare = tryLoadSharedFromHash();
+  if (!fromShare) {
+    try {
+      const current = JSON.parse(localStorage.getItem(CURRENT_KEY));
+      if (current) {
+        activeScenarioId = current.activeId || null;
+        applySnapshot(current.data);
+        if (isSecurePersistableOrigin() && storageProbe()) showToast('↩ Previous values restored');
+      } else if (typeof updateLoanRules === 'function') {
+        updateLoanRules();
+      }
+    } catch(e) {
+      if (typeof updateLoanRules === 'function') updateLoanRules();
+    }
+  }
+  renderChips();
+  attachSaveListeners();
+  if ('serviceWorker' in navigator && isSecurePersistableOrigin()) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+  setTimeout(() => { if (typeof initPolicy === 'function') initPolicy(); }, 800);
+});
+</script>
+</body>
+</html>
