@@ -1717,7 +1717,7 @@ function syncSellCpfTotal() {
   if (el) el.value = String(total);
   const note = document.getElementById('sell-cpf-sum-note');
   if (note) {
-    note.textContent = '= My CPF-OA ' + fmt(mine) + ' + Spouse's CPF-OA ' + fmt(spouse) + ' (auto-totalled for refund)';
+    note.textContent = "= My CPF-OA " + fmt(mine) + " + Spouse's CPF-OA " + fmt(spouse) + " (auto-totalled for refund)";
   }
   return total;
 }
