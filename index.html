@@ -973,9 +973,9 @@
         <div class="radio-group">
           <label class="radio-chip"><input type="radio" name="sell-years" value="0"> &lt;1 yr</label>
           <label class="radio-chip"><input type="radio" name="sell-years" value="1"> 1–2 yrs</label>
-          <label class="radio-chip"><input type="radio" name="sell-years" value="2" checked> 2–3 yrs</label>
+          <label class="radio-chip"><input type="radio" name="sell-years" value="2"> 2–3 yrs</label>
           <label class="radio-chip"><input type="radio" name="sell-years" value="3"> 3–4 yrs</label>
-          <label class="radio-chip"><input type="radio" name="sell-years" value="4"> 4+ yrs</label>
+          <label class="radio-chip"><input type="radio" name="sell-years" value="4" checked> 4+ yrs</label>
         </div>
       </div>
 
@@ -2980,6 +2980,9 @@ function newScenario() {
     const first = document.querySelector(`input[name="${name}"]`);
     if (first) first.checked = true;
   });
+  // Default Years Held to 4+ yrs (SSD typically not applicable)
+  const sellYears4 = document.querySelector('input[name="sell-years"][value="4"]');
+  if (sellYears4) sellYears4.checked = true;
   const levyField = document.getElementById('levy-field');
   const ssdField = document.getElementById('ssd-year-field');
   if (levyField) levyField.style.display = 'none';
