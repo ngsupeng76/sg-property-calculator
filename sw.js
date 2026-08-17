@@ -1,5 +1,5 @@
 /* SG Property Calculator — offline cache */
-const CACHE = 'sg-prop-calc-v20260814f';
+const CACHE = 'sg-prop-calc-v20260817a';
 const ASSETS = [
   './',
   './index.html',

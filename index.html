@@ -941,8 +941,19 @@
       </div>
 
       <div class="field">
-        <label>CPF Used (Principal + Accrued Interest) (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf" placeholder="0" value="0"></div>
+        <label>My CPF-OA Used (Principal + Accrued Interest) (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf-mine" placeholder="0" value="0" min="0" step="1" oninput="syncSellCpfTotal()" onchange="syncSellCpfTotal()"></div>
+      </div>
+
+      <div class="field">
+        <label>My Spouse's CPF Used (Principal + Accrued Interest) (S$)</label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf-spouse" placeholder="0" value="0" min="0" step="1" oninput="syncSellCpfTotal()" onchange="syncSellCpfTotal()"></div>
+      </div>
+
+      <div class="field">
+        <label>CPF-OA Used (Principal + Accrued Interest) (S$) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted)">— sum</span></label>
+        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf" placeholder="0" value="0" readonly tabindex="-1" style="background:var(--surface-2,#F4F5F7);cursor:default"></div>
+        <div class="field-linked-note" id="sell-cpf-sum-note" style="display:block;color:var(--ink-muted)">= My CPF-OA + Spouse's CPF (auto-totalled for refund)</div>
       </div>
 
       <div class="section-title" style="margin-top:22px"><span>📋</span> Seller's Stamp Duty (SSD)</div>
@@ -1698,10 +1709,34 @@ function calcSSD(price, era, yearsHeld) {
 }
 
 
+function syncSellCpfTotal() {
+  const mine = parseFloat(document.getElementById('sell-cpf-mine')?.value) || 0;
+  const spouse = parseFloat(document.getElementById('sell-cpf-spouse')?.value) || 0;
+  const total = Math.round((mine + spouse) * 100) / 100;
+  const el = document.getElementById('sell-cpf');
+  if (el) el.value = String(total);
+  const note = document.getElementById('sell-cpf-sum-note');
+  if (note) {
+    note.textContent = '= My CPF-OA ' + fmt(mine) + ' + Spouse ' + fmt(spouse) + ' (auto-totalled for refund)';
+  }
+  return total;
+}
+
+/** Read sell-side CPF used: prefers mine+spouse sum. */
+function getSellCpfParts() {
+  const mine = parseFloat(document.getElementById('sell-cpf-mine')?.value) || 0;
+  const spouse = parseFloat(document.getElementById('sell-cpf-spouse')?.value) || 0;
+  const total = syncSellCpfTotal();
+  return { mine, spouse, total };
+}
+
 function calcSell() {
   const price       = parseFloat(document.getElementById('sell-price').value) || 0;
   const loan        = parseFloat(document.getElementById('sell-loan').value) || 0;
-  const cpf         = parseFloat(document.getElementById('sell-cpf').value) || 0;
+  const cpfParts    = getSellCpfParts();
+  const cpfMine     = cpfParts.mine;
+  const cpfSpouse   = cpfParts.spouse;
+  const cpf         = cpfParts.total;
   const commRate    = parseFloat(document.getElementById('sell-commission').value) || 0;
   const legal       = parseFloat(document.getElementById('sell-legal').value) || 0;
   const redemption  = parseFloat(document.getElementById('sell-redemption').value) || 0;
@@ -1845,13 +1880,25 @@ function calcSell() {
             <td class="zero-val" style="padding:10px 14px">—</td>
             <td class="row-value">${fmt(loan)}</td>
           </tr>
-          <tr>
-            <td class="item-name">CPF Refund (Principal + Accrued Interest) <span class="split-tag tag-cpf">→ CPF-OA</span></td>
+          ${cpfMine > 0 ? `<tr>
+            <td class="item-name">My CPF-OA Used (Principal + Accrued Interest) <span class="split-tag tag-cpf">→ CPF-OA</span></td>
             <td class="zero-val" style="padding:10px 14px">—</td>
-            <td class="cpf-val" style="color:#C8102E">− ${fmt(cpfReturned)}</td>
-            <td class="row-value">${fmt(cpfReturned)}</td>
+            <td class="cpf-val" style="color:#C8102E">− ${fmt(cpfMine)}</td>
+            <td class="row-value">${fmt(cpfMine)}</td>
+          </tr>` : ''}
+          ${cpfSpouse > 0 ? `<tr>
+            <td class="item-name">My Spouse's CPF Used (Principal + Accrued Interest) <span class="split-tag tag-cpf">→ CPF-OA</span></td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="cpf-val" style="color:#C8102E">− ${fmt(cpfSpouse)}</td>
+            <td class="row-value">${fmt(cpfSpouse)}</td>
+          </tr>` : ''}
+          <tr>
+            <td class="item-name"><strong>CPF-OA Used (Principal + Accrued Interest)</strong> <span class="split-tag tag-cpf">→ CPF-OA sum</span></td>
+            <td class="zero-val" style="padding:10px 14px">—</td>
+            <td class="cpf-val" style="color:#C8102E"><strong>− ${fmt(cpfReturned)}</strong></td>
+            <td class="row-value"><strong>${fmt(cpfReturned)}</strong></td>
           </tr>
-          <tr><td colspan="4" class="note-row">CPF refund goes directly back to your CPF-OA account, not as cash in hand. Accrued interest ≈2.5% p.a. on CPF principal used.</td></tr>
+          <tr><td colspan="4" class="note-row">CPF refund goes directly back to each person's CPF-OA account, not as cash in hand. Accrued interest ≈2.5% p.a. on CPF principal used. Total = My CPF-OA ${fmt(cpfMine)} + Spouse ${fmt(cpfSpouse)}.</td></tr>
           ${ssd > 0 ? `<tr>
             <td class="item-name">Seller's Stamp Duty (SSD) <span class="split-tag tag-cash">Cash only</span></td>
             <td class="cash-val" style="color:#C8102E">− ${fmt(ssd)}</td>
@@ -2581,7 +2628,10 @@ function calcCombined() {
 
   // Re-gather for combined
   const loan        = parseFloat(document.getElementById('sell-loan').value) || 0;
-  const cpf         = parseFloat(document.getElementById('sell-cpf').value) || 0;
+  const cpfParts    = getSellCpfParts();
+  const cpfMine     = cpfParts.mine;
+  const cpfSpouse   = cpfParts.spouse;
+  const cpf         = cpfParts.total;
   const commRate    = parseFloat(document.getElementById('sell-commission').value) || 0;
   const sellComm    = Math.round(sellPrice * commRate / 100);
   const sellCommGST = Math.round(sellComm * POLICY.cpf.gstOnCommission);
@@ -2661,7 +2711,9 @@ function calcCombined() {
         <div class="breakdown-section">
           <div class="breakdown-row"><span class="row-label">Gross Sale Price</span><span class="row-value">${fmt(sellPrice)}</span></div>
           <div class="breakdown-row"><span class="row-label">Loan Repayment</span><span class="row-value deduct">− ${fmt(loan)}</span></div>
-          <div class="breakdown-row"><span class="row-label">CPF Refund</span><span class="row-value deduct">− ${fmt(cpf)}</span></div>
+          ${cpfMine > 0 ? `<div class="breakdown-row"><span class="row-label">My CPF-OA Used</span><span class="row-value deduct">− ${fmt(cpfMine)}</span></div>` : ''}
+          ${cpfSpouse > 0 ? `<div class="breakdown-row"><span class="row-label">Spouse's CPF Used</span><span class="row-value deduct">− ${fmt(cpfSpouse)}</span></div>` : ''}
+          ${cpfMine <= 0 && cpfSpouse <= 0 ? `<div class="breakdown-row"><span class="row-label">CPF-OA Used (sum)</span><span class="row-value deduct">− ${fmt(cpf)}</span></div>` : (cpfMine > 0 && cpfSpouse > 0 ? `<div class="breakdown-row" style="opacity:0.85"><span class="row-label">CPF-OA Used (sum)</span><span class="row-value">${fmt(cpf)}</span></div>` : '')}
           <div class="breakdown-row"><span class="row-label">Agent Comm. + GST</span><span class="row-value deduct">− ${fmt(sellComm+sellCommGST)}</span></div>
           <div class="breakdown-row"><span class="row-label">Legal Fees</span><span class="row-value deduct">− ${fmt(sellLegal)}</span></div>
           ${ssd>0?`<div class="breakdown-row"><span class="row-label">SSD</span><span class="row-value deduct">− ${fmt(ssd)}</span></div>`:''}
@@ -2721,12 +2773,14 @@ document.getElementById('sell-ssd-era').addEventListener('change', function() {
 // ─── PERSISTENCE & SCENARIO MANAGER ──────────────────────────────
 const SCENARIOS_KEY = 'sg_prop_scenarios_v1';
 const CURRENT_KEY   = 'sg_prop_current_v1';
-const APP_VERSION   = '2026.08.14';
+const APP_VERSION   = '2026.08.17';
 
 const FIELDS = [
   { id: 'link-sell-to-buy', type: 'checkbox' },
   { id: 'sell-price',      type: 'number' },
   { id: 'sell-loan',       type: 'number' },
+  { id: 'sell-cpf-mine',   type: 'number' },
+  { id: 'sell-cpf-spouse', type: 'number' },
   { id: 'sell-cpf',        type: 'number' },
   { id: 'sell-commission', type: 'number' },
   { id: 'sell-legal',      type: 'number' },
@@ -2829,6 +2883,14 @@ function captureSnapshot() {
 
 function applySnapshot(data) {
   if (!data) return;
+  // Migrate legacy single sell-cpf → mine when split fields are absent
+  if (data['sell-cpf'] !== undefined && data['sell-cpf'] !== '' &&
+      data['sell-cpf-mine'] === undefined && data['sell-cpf-spouse'] === undefined) {
+    data = Object.assign({}, data, {
+      'sell-cpf-mine': data['sell-cpf'],
+      'sell-cpf-spouse': '0',
+    });
+  }
   FIELDS.forEach(({ id, type }) => {
     const el = document.getElementById(id);
     if (!el || data[id] === undefined) return;
@@ -2841,6 +2903,7 @@ function applySnapshot(data) {
     const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
     if (radio) radio.checked = true;
   });
+  if (typeof syncSellCpfTotal === 'function') syncSellCpfTotal();
   const levy = document.getElementById('sell-levy');
   const levyField = document.getElementById('levy-field');
   if (levy && levyField) levyField.style.display = levy.checked ? 'block' : 'none';
@@ -3286,7 +3349,7 @@ function attachSaveListeners() {
   }
 
   // Live-update linked buy funds when sell inputs change
-  const sellWatchIds = ['sell-price','sell-loan','sell-cpf','sell-commission','sell-legal','sell-redemption','sell-levy-amt','sell-misc','sell-ssd-era','sell-lockin','sell-levy'];
+  const sellWatchIds = ['sell-price','sell-loan','sell-cpf-mine','sell-cpf-spouse','sell-commission','sell-legal','sell-redemption','sell-levy-amt','sell-misc','sell-ssd-era','sell-lockin','sell-levy'];
   const onSellChange = () => {
     if (!isSellBuyLinked()) { formatSellLinkMeta(); return; }
     const price = parseFloat(document.getElementById('sell-price').value) || 0;
@@ -3494,6 +3557,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   renderChips();
   attachSaveListeners();
+  if (typeof syncSellCpfTotal === 'function') syncSellCpfTotal();
   if ('serviceWorker' in navigator && isSecurePersistableOrigin()) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
