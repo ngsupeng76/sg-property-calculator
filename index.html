@@ -151,7 +151,7 @@
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
-  input[type="number"], select {
+  input[type="number"], input[type="text"].money-input, select {
     width: 100%;
     padding: 11px 14px;
     border: 1.5px solid var(--border);
@@ -165,7 +165,7 @@
   }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  input[type="number"]:focus, select:focus {
+  input[type="number"]:focus, input[type="text"].money-input:focus, select:focus {
     outline: none;
     border-color: var(--red);
   }
@@ -932,27 +932,27 @@
 
       <div class="field">
         <label>Expected Selling Price (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-price" placeholder="800,000" value=""></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-price" placeholder="800,000.00" value=""></div>
       </div>
 
       <div class="field">
         <label>Outstanding Home Loan (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-loan" placeholder="0" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-loan" placeholder="0.00" value="0.00"></div>
       </div>
 
       <div class="field">
         <label>My CPF-OA Used (Principal + Accrued Interest) (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf-mine" placeholder="0" value="0" min="0" step="1" oninput="syncSellCpfTotal()" onchange="syncSellCpfTotal()"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-cpf-mine" placeholder="0.00" value="0.00" oninput="syncSellCpfTotal()" onchange="syncSellCpfTotal()"></div>
       </div>
 
       <div class="field">
         <label>My Spouse's CPF-OA Used (Principal + Accrued Interest) (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf-spouse" placeholder="0" value="0" min="0" step="1" oninput="syncSellCpfTotal()" onchange="syncSellCpfTotal()"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-cpf-spouse" placeholder="0.00" value="0.00" oninput="syncSellCpfTotal()" onchange="syncSellCpfTotal()"></div>
       </div>
 
       <div class="field">
         <label>Total CPF-OA Used (Principal + Accrued Interest) (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf" placeholder="0" value="0" readonly tabindex="-1" style="background:var(--surface-2,#F4F5F7);cursor:default"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-cpf" placeholder="0.00" value="0.00" readonly tabindex="-1" style="background:var(--surface-2,#F4F5F7);cursor:default"></div>
         <div class="field-linked-note" id="sell-cpf-sum-note" style="display:block;color:var(--ink-muted)">= My CPF-OA + Spouse's CPF-OA (auto-totalled for refund)</div>
       </div>
 
@@ -989,12 +989,12 @@
 
       <div class="field">
         <label>Legal / Conveyancing Fees (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-legal" placeholder="2500" value="2500"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-legal" placeholder="2,500.00" value="2,500.00"></div>
       </div>
 
       <div class="field">
         <label>Mortgage Redemption Admin Fee (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-redemption" placeholder="300" value="300"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-redemption" placeholder="300.00" value="300.00"></div>
       </div>
 
       <div class="toggle-row">
@@ -1008,12 +1008,12 @@
       </div>
       <div class="field" id="levy-field" style="display:none">
         <label>Resale Levy Amount (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-levy-amt" placeholder="40000" value="40000"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-levy-amt" placeholder="40,000.00" value="40,000.00"></div>
       </div>
 
       <div class="field">
         <label>Property Tax / MCST Proration (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="sell-misc" placeholder="1500" value="1500"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="sell-misc" placeholder="1,500.00" value="1,500.00"></div>
       </div>
 
       <div class="section-title" style="margin-top:22px"><span>💰</span> Your Proceeds Split</div>
@@ -1037,7 +1037,7 @@
 
       <div class="field">
         <label>Purchase Price (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-price" placeholder="1200000" value=""></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-price" placeholder="1,200,000.00" value=""></div>
       </div>
 
       <div class="section-title" style="margin-top:22px"><span>👤</span> Buyer Profile</div>
@@ -1083,7 +1083,7 @@
       <div id="loan-fields">
         <div class="field">
           <label>Loan Amount (S$)</label>
-          <div class="prefix-wrap"><span>$</span><input type="number" id="buy-loan" placeholder="600000" value="0"></div>
+          <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-loan" placeholder="600,000.00" value="0.00"></div>
         </div>
 
         <div class="field">
@@ -1106,12 +1106,12 @@
 
         <div class="field">
           <label>Gross Monthly Income — all borrowers (S$)</label>
-          <div class="prefix-wrap"><span>$</span><input type="number" id="buy-income" placeholder="10000" value="" oninput="refreshAffordability()"></div>
+          <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-income" placeholder="10,000.00" value="" oninput="refreshAffordability()"></div>
         </div>
 
         <div class="field">
           <label>Existing Monthly Debt Obligations (S$)</label>
-          <div class="prefix-wrap"><span>$</span><input type="number" id="buy-debt" placeholder="0" value="0" oninput="refreshAffordability()"></div>
+          <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-debt" placeholder="0.00" value="0.00" oninput="refreshAffordability()"></div>
         </div>
 
         <div class="field">
@@ -1125,7 +1125,7 @@
 
       <div class="field">
         <label>Valuation / Appraisal Fee (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-valuation" placeholder="500" value="500"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-valuation" placeholder="500.00" value="500.00"></div>
       </div>
 
       <div class="section-title" style="margin-top:22px"><span>💼</span> Agent &amp; Legal Costs</div>
@@ -1138,17 +1138,17 @@
 
       <div class="field">
         <label>Legal / Conveyancing Fees (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-legal" placeholder="3000" value="3000"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-legal" placeholder="3,000.00" value="3,000.00"></div>
       </div>
 
       <div class="field">
         <label>Home Insurance (Estimate) (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-insurance" placeholder="500" value="500"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-insurance" placeholder="500.00" value="500.00"></div>
       </div>
 
       <div class="field">
         <label>Renovation Budget (S$) — for reference</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-reno" placeholder="0" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-reno" placeholder="0.00" value="0.00"></div>
       </div>
 
       <div class="section-title" style="margin-top:22px"><span>💰</span> Your CPF &amp; Cash Available</div>
@@ -1165,25 +1165,25 @@
 
       <div class="field">
         <label>CPF-OA Available (S$) <span id="buy-cpf-link-label" style="font-weight:400;text-transform:none;letter-spacing:0;color:#1B7A4B"></span></label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cpf-avail" placeholder="100000" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-cpf-avail" placeholder="100,000.00" value="0.00"></div>
         <div class="field-linked-note" id="buy-cpf-note" style="display:none">= CPF-OA Returned from sale (liquid OA)</div>
       </div>
 
       <div class="field">
         <label>Invested CPF-OA Portfolio (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cpf-invested" placeholder="0" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-cpf-invested" placeholder="0.00" value="0.00"></div>
         <div class="field-linked-note" style="display:block;color:var(--ink-muted)">CPF-OA currently in investments (e.g. CPFIS) you can redeem for this purchase</div>
       </div>
 
       <div class="field">
         <label>Cash Available (S$) <span id="buy-cash-link-label" style="font-weight:400;text-transform:none;letter-spacing:0;color:#1B4B7A"></span></label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cash-avail" placeholder="200000" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-cash-avail" placeholder="200,000.00" value="0.00"></div>
         <div class="field-linked-note" id="buy-cash-note" style="display:none;color:#1B4B7A">= Net Cash to You from sale (liquid cash)</div>
       </div>
 
       <div class="field">
         <label>Invested Cash Portfolio (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="buy-cash-invested" placeholder="0" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="buy-cash-invested" placeholder="0.00" value="0.00"></div>
         <div class="field-linked-note" style="display:block;color:var(--ink-muted)">Brokerage / stocks / funds / other cash investments you can liquidate for this purchase</div>
       </div>
 
@@ -1209,7 +1209,7 @@
 
       <div class="field">
         <label>Bridging Loan Interest (if buying before selling) (S$)</label>
-        <div class="prefix-wrap"><span>$</span><input type="number" id="bridging" placeholder="0" value="0"></div>
+        <div class="prefix-wrap"><span>$</span><input type="text" inputmode="decimal" class="money-input" id="bridging" placeholder="0.00" value="0.00"></div>
       </div>
 
       <button class="calc-btn" onclick="calcCombined()">Calculate Full Picture →</button>
@@ -1261,7 +1261,7 @@ function switchTab(tab) {
   // Keep buy funds in sync when opening Buying / Combined
   if ((tab === 'buy' || tab === 'combined') && typeof applySellProceedsToBuy === 'function') {
     if (isSellBuyLinked() && !lastSellResults) {
-      const price = parseFloat(document.getElementById('sell-price').value) || 0;
+      const price = numVal('sell-price');
       if (price) {
         try { calcSell(); } catch (e) {}
       } else {
@@ -1288,6 +1288,64 @@ function fmtNum(n) {
   // Plain number with commas + 2dp (for non-currency like income, debt)
   return Math.abs(n).toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+function parseMoney(v) {
+  if (v == null || v === '') return 0;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+  let s = String(v).trim();
+  if (!s) return 0;
+  // keep digits, dot, leading minus; drop commas/spaces/currency symbols
+  s = s.replace(/[^0-9.\-]/g, '');
+  if (!s || s === '-' || s === '.' || s === '-.') return 0;
+  // if multiple dots, keep first
+  const parts = s.split('.');
+  if (parts.length > 2) s = parts[0] + '.' + parts.slice(1).join('');
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+}
+function formatMoneyInput(v) {
+  const n = typeof v === 'number' ? v : parseMoney(v);
+  if (!Number.isFinite(n)) return '0.00';
+  return n.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function numVal(idOrEl) {
+  const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+  return parseMoney(el?.value);
+}
+const CURRENCY_FIELD_IDS = new Set([
+  'sell-price','sell-loan','sell-cpf-mine','sell-cpf-spouse','sell-cpf',
+  'sell-legal','sell-redemption','sell-levy-amt','sell-misc',
+  'buy-price','buy-loan','buy-income','buy-debt','buy-valuation',
+  'buy-legal','buy-insurance','buy-reno',
+  'buy-cpf-avail','buy-cpf-invested','buy-cash-avail','buy-cash-invested',
+  'bridging'
+]);
+function setMoneyField(idOrEl, value) {
+  const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+  if (!el) return;
+  el.value = formatMoneyInput(value);
+}
+function initCurrencyInputs() {
+  CURRENCY_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('money-input');
+    el.setAttribute('inputmode', 'decimal');
+    el.addEventListener('focus', () => {
+      if (el.readOnly) return;
+      const n = parseMoney(el.value);
+      // raw edit mode without commas
+      el.value = (el.value.trim() === '' && n === 0) ? '' : String(n);
+      try { el.select(); } catch (e) {}
+    });
+    el.addEventListener('blur', () => {
+      el.value = formatMoneyInput(el.value === '' ? 0 : el.value);
+    });
+    // initial display
+    if (el.value !== '' && el.value != null) el.value = formatMoneyInput(el.value);
+  });
+}
+
 
 // ═══════════════════════════════════════════════════════════════════
 // POLICY CONFIG — all rate constants live here.
@@ -1710,11 +1768,11 @@ function calcSSD(price, era, yearsHeld) {
 
 
 function syncSellCpfTotal() {
-  const mine = parseFloat(document.getElementById('sell-cpf-mine')?.value) || 0;
-  const spouse = parseFloat(document.getElementById('sell-cpf-spouse')?.value) || 0;
+  const mine = numVal('sell-cpf-mine');
+  const spouse = numVal('sell-cpf-spouse');
   const total = Math.round((mine + spouse) * 100) / 100;
   const el = document.getElementById('sell-cpf');
-  if (el) el.value = String(total);
+  if (el) el.value = formatMoneyInput(total);
   const note = document.getElementById('sell-cpf-sum-note');
   if (note) {
     note.textContent = "= My CPF-OA " + fmt(mine) + " + Spouse's CPF-OA " + fmt(spouse) + " (auto-totalled for refund)";
@@ -1724,26 +1782,26 @@ function syncSellCpfTotal() {
 
 /** Read sell-side CPF used: prefers mine+spouse sum. */
 function getSellCpfParts() {
-  const mine = parseFloat(document.getElementById('sell-cpf-mine')?.value) || 0;
-  const spouse = parseFloat(document.getElementById('sell-cpf-spouse')?.value) || 0;
+  const mine = numVal('sell-cpf-mine');
+  const spouse = numVal('sell-cpf-spouse');
   const total = syncSellCpfTotal();
   return { mine, spouse, total };
 }
 
 function calcSell() {
-  const price       = parseFloat(document.getElementById('sell-price').value) || 0;
-  const loan        = parseFloat(document.getElementById('sell-loan').value) || 0;
+  const price       = numVal('sell-price');
+  const loan        = numVal('sell-loan');
   const cpfParts    = getSellCpfParts();
   const cpfMine     = cpfParts.mine;
   const cpfSpouse   = cpfParts.spouse;
   const cpf         = cpfParts.total;
-  const commRate    = parseFloat(document.getElementById('sell-commission').value) || 0;
-  const legal       = parseFloat(document.getElementById('sell-legal').value) || 0;
-  const redemption  = parseFloat(document.getElementById('sell-redemption').value) || 0;
+  const commRate    = numVal('sell-commission');
+  const legal       = numVal('sell-legal');
+  const redemption  = numVal('sell-redemption');
   const lockin      = document.getElementById('sell-lockin').checked;
   const levyOn      = document.getElementById('sell-levy').checked;
-  const levyAmt     = parseFloat(document.getElementById('sell-levy-amt').value) || 0;
-  const misc        = parseFloat(document.getElementById('sell-misc').value) || 0;
+  const levyAmt     = numVal('sell-levy-amt');
+  const misc        = numVal('sell-misc');
   const era         = document.getElementById('sell-ssd-era').value;
   const yearsHeld   = document.querySelector('input[name="sell-years"]:checked')?.value || '4';
 
@@ -2043,11 +2101,11 @@ function applySellProceedsToBuy(opts) {
   const cash = Math.max(0, Number(lastSellResults.netCash) || 0);
 
   _applyingSellLink = true;
-  const cpfChanged = String(cpfInput.value) !== String(cpf);
-  const cashChanged = String(cashInput.value) !== String(cash);
-  cpfInput.value = cpf;
-  cashInput.value = cash;
-  _applyingSellLink = false;
+    const cpfChanged = parseMoney(cpfInput.value) !== cpf;
+    const cashChanged = parseMoney(cashInput.value) !== cash;
+    cpfInput.value = formatMoneyInput(cpf);
+    cashInput.value = formatMoneyInput(cash);
+    _applyingSellLink = false;
 
   if (typeof refreshBuyFundsTotalHint === 'function') refreshBuyFundsTotalHint();
 
@@ -2202,9 +2260,9 @@ function refreshAffordability() {
   const afEl = resultsEl ? resultsEl.querySelector('#live-affordability') : null;
   if (!afEl) return; // results not yet calculated — do nothing
 
-  const loanAmt  = parseFloat(document.getElementById('buy-loan').value) || 0;
-  const income   = parseFloat(document.getElementById('buy-income').value) || 0;
-  const debt     = parseFloat(document.getElementById('buy-debt').value) || 0;
+  const loanAmt  = numVal('buy-loan');
+  const income   = numVal('buy-income');
+  const debt     = numVal('buy-debt');
   const rate     = parseFloat(document.getElementById('buy-rate').value) || 1.5;
   const tenure   = parseInt(document.getElementById('buy-tenure').value) || 25;
   const buyType  = document.querySelector('input[name="buy-type"]:checked').value;
@@ -2280,10 +2338,10 @@ function calcMaxLoan(income, existingDebt, rate, tenure) {
 
 // ─── BUY CALCULATION ──────────────────────────────────────────────
 function getBuyFundsAvailable() {
-  const cpfLiquid = parseFloat(document.getElementById('buy-cpf-avail')?.value) || 0;
-  const cashLiquid = parseFloat(document.getElementById('buy-cash-avail')?.value) || 0;
-  const cpfInvested = parseFloat(document.getElementById('buy-cpf-invested')?.value) || 0;
-  const cashInvested = parseFloat(document.getElementById('buy-cash-invested')?.value) || 0;
+  const cpfLiquid = numVal('buy-cpf-avail');
+  const cashLiquid = numVal('buy-cash-avail');
+  const cpfInvested = numVal('buy-cpf-invested');
+  const cashInvested = numVal('buy-cash-invested');
   return {
     cpfLiquid,
     cashLiquid,
@@ -2307,16 +2365,16 @@ function refreshBuyFundsTotalHint() {
 
 /** Shared Buy-tab cash vs CPF-OA allocation (max CPF usage scenario). */
 function computeBuyOutlaySplit() {
-  const price       = parseFloat(document.getElementById('buy-price').value) || 0;
+  const price       = numVal('buy-price');
   const citizenship = document.getElementById('buy-citizenship').value;
   const propCount   = parseInt(document.querySelector('input[name="buy-props"]:checked')?.value || '0');
   const loanType    = document.querySelector('input[name="loan-type"]:checked')?.value || 'none';
-  const loanAmt     = loanType !== 'none' ? (parseFloat(document.getElementById('buy-loan').value) || 0) : 0;
-  const valuation   = parseFloat(document.getElementById('buy-valuation').value) || 0;
-  const commRate    = parseFloat(document.getElementById('buy-commission').value) || 0;
-  const legal       = parseFloat(document.getElementById('buy-legal').value) || 0;
-  const insurance   = parseFloat(document.getElementById('buy-insurance').value) || 0;
-  const reno        = parseFloat(document.getElementById('buy-reno').value) || 0;
+  const loanAmt     = loanType !== 'none' ? (numVal('buy-loan')) : 0;
+  const valuation   = numVal('buy-valuation');
+  const commRate    = numVal('buy-commission');
+  const legal       = numVal('buy-legal');
+  const insurance   = numVal('buy-insurance');
+  const reno        = numVal('buy-reno');
   const funds       = getBuyFundsAvailable();
   const cpfAvail    = funds.cpfTotal;
   const buyType     = document.querySelector('input[name="buy-type"]:checked')?.value || 'hdb';
@@ -2365,22 +2423,22 @@ function computeBuyOutlaySplit() {
 }
 
 function calcBuy() {
-  const price       = parseFloat(document.getElementById('buy-price').value) || 0;
+  const price       = numVal('buy-price');
   const citizenship = document.getElementById('buy-citizenship').value;
   const propCount   = parseInt(document.querySelector('input[name="buy-props"]:checked')?.value || '0');
   const loanType    = document.querySelector('input[name="loan-type"]:checked').value;
-  const loanAmt     = loanType !== 'none' ? (parseFloat(document.getElementById('buy-loan').value) || 0) : 0;
+  const loanAmt     = loanType !== 'none' ? (numVal('buy-loan')) : 0;
   const age         = parseInt(document.getElementById('buy-age')?.value) || 0;
   const tenure      = parseInt(document.getElementById('buy-tenure')?.value) || 0;
   const lease       = parseInt(document.getElementById('buy-lease')?.value) || 99;
-  const income      = parseFloat(document.getElementById('buy-income')?.value) || 0;
-  const existDebt   = parseFloat(document.getElementById('buy-debt')?.value) || 0;
+  const income      = numVal('buy-income');
+  const existDebt   = numVal('buy-debt');
   const intRate     = parseFloat(document.getElementById('buy-rate')?.value) || 3.5;
-  const valuation   = parseFloat(document.getElementById('buy-valuation').value) || 0;
-  const commRate    = parseFloat(document.getElementById('buy-commission').value) || 0;
-  const legal       = parseFloat(document.getElementById('buy-legal').value) || 0;
-  const insurance   = parseFloat(document.getElementById('buy-insurance').value) || 0;
-  const reno        = parseFloat(document.getElementById('buy-reno').value) || 0;
+  const valuation   = numVal('buy-valuation');
+  const commRate    = numVal('buy-commission');
+  const legal       = numVal('buy-legal');
+  const insurance   = numVal('buy-insurance');
+  const reno        = numVal('buy-reno');
   const funds = getBuyFundsAvailable();
   const cpfAvail    = funds.cpfTotal;
   const cashAvail   = funds.cashTotal;
@@ -2674,8 +2732,8 @@ function calcBuy() {
 // ─── COMBINED CALCULATION ─────────────────────────────────────────
 function calcCombined() {
   // Pull values from both tabs
-  const sellPrice    = parseFloat(document.getElementById('sell-price').value) || 0;
-  const buyPrice     = parseFloat(document.getElementById('buy-price').value) || 0;
+  const sellPrice    = numVal('sell-price');
+  const buyPrice     = numVal('buy-price');
 
   if (!sellPrice || !buyPrice) {
     alert('Please fill in both the Selling and Buying tabs first, then come here.');
@@ -2687,20 +2745,20 @@ function calcCombined() {
   calcBuy();
 
   // Re-gather for combined
-  const loan        = parseFloat(document.getElementById('sell-loan').value) || 0;
+  const loan        = numVal('sell-loan');
   const cpfParts    = getSellCpfParts();
   const cpfMine     = cpfParts.mine;
   const cpfSpouse   = cpfParts.spouse;
   const cpf         = cpfParts.total;
-  const commRate    = parseFloat(document.getElementById('sell-commission').value) || 0;
+  const commRate    = numVal('sell-commission');
   const sellComm    = Math.round(sellPrice * commRate / 100);
   const sellCommGST = Math.round(sellComm * POLICY.cpf.gstOnCommission);
-  const sellLegal   = parseFloat(document.getElementById('sell-legal').value) || 0;
-  const redemption  = parseFloat(document.getElementById('sell-redemption').value) || 0;
+  const sellLegal   = numVal('sell-legal');
+  const redemption  = numVal('sell-redemption');
   const lockin      = document.getElementById('sell-lockin').checked;
   const levyOn      = document.getElementById('sell-levy').checked;
-  const levyAmt     = parseFloat(document.getElementById('sell-levy-amt').value) || 0;
-  const misc        = parseFloat(document.getElementById('sell-misc').value) || 0;
+  const levyAmt     = numVal('sell-levy-amt');
+  const misc        = numVal('sell-misc');
   const era         = document.getElementById('sell-ssd-era').value;
   const yearsHeld   = document.querySelector('input[name="sell-years"]:checked')?.value || '4';
   const ssd         = calcSSD(sellPrice, era, yearsHeld);
@@ -2711,15 +2769,15 @@ function calcCombined() {
 
   const citizenship  = document.getElementById('buy-citizenship').value;
   const propCount    = parseInt(document.querySelector('input[name="buy-props"]:checked')?.value || '0');
-  const buyLoan      = parseFloat(document.getElementById('buy-loan').value) || 0;
-  const buyValuation = parseFloat(document.getElementById('buy-valuation').value) || 0;
-  const buyCommRate  = parseFloat(document.getElementById('buy-commission').value) || 0;
+  const buyLoan      = numVal('buy-loan');
+  const buyValuation = numVal('buy-valuation');
+  const buyCommRate  = numVal('buy-commission');
   const buyComm      = Math.round(buyPrice * buyCommRate / 100);
   const buyCommGST   = Math.round(buyComm * POLICY.cpf.gstOnCommission);
-  const buyLegal     = parseFloat(document.getElementById('buy-legal').value) || 0;
-  const insurance    = parseFloat(document.getElementById('buy-insurance').value) || 0;
-  const reno         = parseFloat(document.getElementById('buy-reno').value) || 0;
-  const bridging     = parseFloat(document.getElementById('bridging').value) || 0;
+  const buyLegal     = numVal('buy-legal');
+  const insurance    = numVal('buy-insurance');
+  const reno         = numVal('buy-reno');
+  const bridging     = numVal('bridging');
   const seq          = document.getElementById('seq').value;
 
   const bsd = calcBSD(buyPrice);
@@ -2988,7 +3046,9 @@ function captureSnapshot() {
   FIELDS.forEach(({ id, type }) => {
     const el = document.getElementById(id);
     if (!el) return;
-    data[id] = type === 'checkbox' ? el.checked : el.value;
+    if (type === 'checkbox') data[id] = el.checked;
+    else if (CURRENCY_FIELD_IDS.has(id)) data[id] = String(parseMoney(el.value));
+    else data[id] = el.value;
   });
   RADIO_GROUPS.forEach(name => {
     const checked = document.querySelector(`input[name="${name}"]:checked`);
@@ -3011,6 +3071,7 @@ function applySnapshot(data) {
     const el = document.getElementById(id);
     if (!el || data[id] === undefined) return;
     if (type === 'checkbox') el.checked = !!data[id];
+    else if (CURRENCY_FIELD_IDS.has(id)) el.value = formatMoneyInput(data[id]);
     else el.value = data[id];
   });
   RADIO_GROUPS.forEach(name => {
@@ -3029,7 +3090,7 @@ function applySnapshot(data) {
   if (typeof updateLoanRules === 'function') updateLoanRules();
   // Rebuild sell results + linked buy funds (avoid forcing buy/combined alerts)
   try {
-    const price = parseFloat(document.getElementById('sell-price').value) || 0;
+    const price = numVal('sell-price');
     if (price && typeof calcSell === 'function') calcSell();
     else if (typeof applySellProceedsToBuy === 'function') applySellProceedsToBuy();
   } catch (e) {}
@@ -3090,6 +3151,7 @@ function newScenario() {
     if (!el) return;
     if (type === 'checkbox') el.checked = false;
     else if (type === 'select') el.selectedIndex = 0;
+    else if (CURRENCY_FIELD_IDS.has(id)) el.value = formatMoneyInput(0);
     else el.value = '';
   });
   RADIO_GROUPS.forEach(name => {
@@ -3453,7 +3515,7 @@ function attachSaveListeners() {
       saveCurrentState();
       if (linkEl.checked) {
         if (!lastSellResults) {
-          const price = parseFloat(document.getElementById('sell-price').value) || 0;
+          const price = numVal('sell-price');
           if (price) { try { calcSell(); } catch (e) {} }
           else applySellProceedsToBuy();
         } else {
@@ -3471,7 +3533,7 @@ function attachSaveListeners() {
   const sellWatchIds = ['sell-price','sell-loan','sell-cpf-mine','sell-cpf-spouse','sell-commission','sell-legal','sell-redemption','sell-levy-amt','sell-misc','sell-ssd-era','sell-lockin','sell-levy'];
   const onSellChange = () => {
     if (!isSellBuyLinked()) { formatSellLinkMeta(); return; }
-    const price = parseFloat(document.getElementById('sell-price').value) || 0;
+    const price = numVal('sell-price');
     if (!price) return;
     if (onSellChange._scheduled) return;
     onSellChange._scheduled = true;
@@ -3658,6 +3720,7 @@ function showToast(msg) {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+  initCurrencyInputs();
   updateStorageUI();
   const fromShare = tryLoadSharedFromHash();
   if (!fromShare) {
