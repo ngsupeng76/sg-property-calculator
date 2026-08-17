@@ -951,7 +951,7 @@
       </div>
 
       <div class="field">
-        <label>CPF-OA Used (Principal + Accrued Interest) (S$) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted)">— sum</span></label>
+        <label>Total CPF-OA Used (Principal + Accrued Interest) (S$)</label>
         <div class="prefix-wrap"><span>$</span><input type="number" id="sell-cpf" placeholder="0" value="0" readonly tabindex="-1" style="background:var(--surface-2,#F4F5F7);cursor:default"></div>
         <div class="field-linked-note" id="sell-cpf-sum-note" style="display:block;color:var(--ink-muted)">= My CPF-OA + Spouse's CPF (auto-totalled for refund)</div>
       </div>
@@ -1893,7 +1893,7 @@ function calcSell() {
             <td class="row-value">${fmt(cpfSpouse)}</td>
           </tr>` : ''}
           <tr>
-            <td class="item-name"><strong>CPF-OA Used (Principal + Accrued Interest)</strong> <span class="split-tag tag-cpf">→ CPF-OA sum</span></td>
+            <td class="item-name"><strong>Total CPF-OA Used (Principal + Accrued Interest)</strong> <span class="split-tag tag-cpf">→ CPF-OA</span></td>
             <td class="zero-val" style="padding:10px 14px">—</td>
             <td class="cpf-val" style="color:#C8102E"><strong>− ${fmt(cpfReturned)}</strong></td>
             <td class="row-value"><strong>${fmt(cpfReturned)}</strong></td>
@@ -2713,7 +2713,7 @@ function calcCombined() {
           <div class="breakdown-row"><span class="row-label">Loan Repayment</span><span class="row-value deduct">− ${fmt(loan)}</span></div>
           ${cpfMine > 0 ? `<div class="breakdown-row"><span class="row-label">My CPF-OA Used</span><span class="row-value deduct">− ${fmt(cpfMine)}</span></div>` : ''}
           ${cpfSpouse > 0 ? `<div class="breakdown-row"><span class="row-label">Spouse's CPF Used</span><span class="row-value deduct">− ${fmt(cpfSpouse)}</span></div>` : ''}
-          ${cpfMine <= 0 && cpfSpouse <= 0 ? `<div class="breakdown-row"><span class="row-label">CPF-OA Used (sum)</span><span class="row-value deduct">− ${fmt(cpf)}</span></div>` : (cpfMine > 0 && cpfSpouse > 0 ? `<div class="breakdown-row" style="opacity:0.85"><span class="row-label">CPF-OA Used (sum)</span><span class="row-value">${fmt(cpf)}</span></div>` : '')}
+          ${cpfMine <= 0 && cpfSpouse <= 0 ? `<div class="breakdown-row"><span class="row-label">Total CPF-OA Used</span><span class="row-value deduct">− ${fmt(cpf)}</span></div>` : (cpfMine > 0 && cpfSpouse > 0 ? `<div class="breakdown-row" style="opacity:0.85"><span class="row-label">Total CPF-OA Used</span><span class="row-value">${fmt(cpf)}</span></div>` : '')}
           <div class="breakdown-row"><span class="row-label">Agent Comm. + GST</span><span class="row-value deduct">− ${fmt(sellComm+sellCommGST)}</span></div>
           <div class="breakdown-row"><span class="row-label">Legal Fees</span><span class="row-value deduct">− ${fmt(sellLegal)}</span></div>
           ${ssd>0?`<div class="breakdown-row"><span class="row-label">SSD</span><span class="row-value deduct">− ${fmt(ssd)}</span></div>`:''}
