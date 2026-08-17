@@ -2304,6 +2304,66 @@ function refreshBuyFundsTotalHint() {
     ' <span style="opacity:.7">(' + fmt(f.cashLiquid) + ' liquid + ' + fmt(f.cashInvested) + ' invested)</span>';
 }
 
+
+/** Shared Buy-tab cash vs CPF-OA allocation (max CPF usage scenario). */
+function computeBuyOutlaySplit() {
+  const price       = parseFloat(document.getElementById('buy-price').value) || 0;
+  const citizenship = document.getElementById('buy-citizenship').value;
+  const propCount   = parseInt(document.querySelector('input[name="buy-props"]:checked')?.value || '0');
+  const loanType    = document.querySelector('input[name="loan-type"]:checked')?.value || 'none';
+  const loanAmt     = loanType !== 'none' ? (parseFloat(document.getElementById('buy-loan').value) || 0) : 0;
+  const valuation   = parseFloat(document.getElementById('buy-valuation').value) || 0;
+  const commRate    = parseFloat(document.getElementById('buy-commission').value) || 0;
+  const legal       = parseFloat(document.getElementById('buy-legal').value) || 0;
+  const insurance   = parseFloat(document.getElementById('buy-insurance').value) || 0;
+  const reno        = parseFloat(document.getElementById('buy-reno').value) || 0;
+  const funds       = getBuyFundsAvailable();
+  const cpfAvail    = funds.cpfTotal;
+  const buyType     = document.querySelector('input[name="buy-type"]:checked')?.value || 'hdb';
+
+  let minCashPct = 0.05;
+  if (propCount >= 1) minCashPct = 0.25;
+  if (buyType === 'hdb') minCashPct = 0.00;
+
+  const downpayment = price - loanAmt;
+  const minCashDown = Math.round(price * minCashPct);
+  const maxCpfDown  = Math.max(0, downpayment - minCashDown);
+  const cpfForDown  = Math.min(maxCpfDown, cpfAvail);
+  const cashForDown = downpayment - cpfForDown;
+
+  const bsd  = calcBSD(price);
+  const absd = calcABSD(price, citizenship, propCount);
+
+  const buyerComm    = Math.round(price * commRate / 100);
+  const buyerCommGST = Math.round(buyerComm * POLICY.cpf.gstOnCommission);
+  const totalComm    = buyerComm + buyerCommGST;
+
+  let cpfLeft = Math.max(0, cpfAvail - cpfForDown);
+  const cpfForBSD  = Math.min(bsd, cpfLeft);  cpfLeft -= cpfForBSD;
+  const cashForBSD = bsd - cpfForBSD;
+  const cpfForABSD  = Math.min(absd, cpfLeft); cpfLeft -= cpfForABSD;
+  const cashForABSD = absd - cpfForABSD;
+  const cpfForLegal  = Math.min(legal, cpfLeft); cpfLeft -= cpfForLegal;
+  const cashForLegal = legal - cpfForLegal;
+
+  const totalCPF  = cpfForDown + cpfForBSD + cpfForABSD + cpfForLegal;
+  const totalCash = cashForDown + cashForBSD + cashForABSD + cashForLegal + valuation + totalComm + insurance + reno;
+
+  return {
+    funds,
+    price,
+    loanAmt,
+    downpayment,
+    bsd,
+    absd,
+    totalCPF,
+    totalCash,
+    grandTotal: totalCPF + totalCash,
+    cpfSurplus: cpfAvail - totalCPF,
+    cashSurplus: funds.cashTotal - totalCash,
+  };
+}
+
 function calcBuy() {
   const price       = parseFloat(document.getElementById('buy-price').value) || 0;
   const citizenship = document.getElementById('buy-citizenship').value;
@@ -2670,6 +2730,19 @@ function calcCombined() {
   const cashSurplus = netCash - totalBuyCost;
   const bridgingAdj = seq === 'buy-first' ? bridging : 0;
 
+  // Cash vs CPF-OA funding position (aligned with Buying tab max-CPF split)
+  const buySplit = computeBuyOutlaySplit();
+  const funds = buySplit.funds;
+  const cashUsed = buySplit.totalCash + bridgingAdj;
+  const cpfUsed = buySplit.totalCPF;
+  const excessTotalCash = funds.cashTotal - cashUsed;
+  const excessTotalCpf = funds.cpfTotal - cpfUsed;
+  // Remaining after deducting invested portfolios (= liquid residual if investments left untouched)
+  const excessCashAfterInvested = excessTotalCash - funds.cashInvested;
+  const excessCpfAfterInvested = excessTotalCpf - funds.cpfInvested;
+  const needCashFromInvested = Math.max(0, cashUsed - funds.cashLiquid);
+  const needCpfFromInvested = Math.max(0, cpfUsed - funds.cpfLiquid);
+
   const el = document.getElementById('result-combined');
   el.innerHTML = `
     <div class="results-header">
@@ -2750,6 +2823,48 @@ function calcCombined() {
     </div>
 
     <div class="breakdown-section">
+      <div class="breakdown-head">💵🏦 Remaining Funds After Purchase</div>
+      <div class="note-row">Aligned with the Buying tab <strong>max CPF-OA usage</strong> split. “After Invested” = excess remaining once Invested Cash Portfolio / Invested CPF-OA are set aside (liquid residual if you do not liquidate investments).</div>
+      <div class="summary-strip" style="margin-top:8px">
+        <div class="sum-card" style="border-left:4px solid #1B4B7A">
+          <div class="sum-label" style="color:#1B4B7A">💵 Excess Total Cash</div>
+          <div class="sum-value" style="color:${excessTotalCash >= 0 ? '#1B4B7A' : '#C8102E'}">${excessTotalCash >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCash))}</div>
+          <div class="sum-note">Total cash ${fmt(funds.cashTotal)} − used ${fmt(cashUsed)}</div>
+        </div>
+        <div class="sum-card" style="border-left:4px solid #3D6FA8">
+          <div class="sum-label" style="color:#1B4B7A">Excess Total Cash after Invested</div>
+          <div class="sum-value" style="color:${excessCashAfterInvested >= 0 ? '#1B4B7A' : '#C8102E'}">${excessCashAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCashAfterInvested))}</div>
+          <div class="sum-note">After deducting invested cash ${fmt(funds.cashInvested)}</div>
+        </div>
+        <div class="sum-card" style="border-left:4px solid #1B7A4B">
+          <div class="sum-label" style="color:#1B7A4B">🏦 Excess Total CPF-OA</div>
+          <div class="sum-value" style="color:${excessTotalCpf >= 0 ? '#1B7A4B' : '#C8102E'}">${excessTotalCpf >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCpf))}</div>
+          <div class="sum-note">Total CPF-OA ${fmt(funds.cpfTotal)} − used ${fmt(cpfUsed)}</div>
+        </div>
+        <div class="sum-card" style="border-left:4px solid #2E9B63">
+          <div class="sum-label" style="color:#1B7A4B">Excess Total CPF-OA after Invested</div>
+          <div class="sum-value" style="color:${excessCpfAfterInvested >= 0 ? '#1B7A4B' : '#C8102E'}">${excessCpfAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCpfAfterInvested))}</div>
+          <div class="sum-note">After deducting invested CPF-OA ${fmt(funds.cpfInvested)}</div>
+        </div>
+      </div>
+      <div class="breakdown-row"><span class="row-label">Cash available (liquid)</span><span class="row-value">${fmt(funds.cashLiquid)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Invested Cash Portfolio (S$)</span><span class="row-value">${fmt(funds.cashInvested)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Total cash available</span><span class="row-value">${fmt(funds.cashTotal)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Cash used for purchase${bridgingAdj > 0 ? ' (incl. bridging)' : ''}</span><span class="row-value deduct">− ${fmt(cashUsed)}</span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total Cash (S$)</strong></span><span class="row-value ${excessTotalCash >= 0 ? '' : 'deduct'}"><strong>${excessTotalCash >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCash))}</strong></span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total Cash after Invested Portfolio (S$)</strong></span><span class="row-value ${excessCashAfterInvested >= 0 ? '' : 'deduct'}"><strong>${excessCashAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCashAfterInvested))}</strong></span></div>
+      <div class="breakdown-row" style="margin-top:6px"><span class="row-label">CPF-OA available (liquid)</span><span class="row-value">${fmt(funds.cpfLiquid)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Invested CPF-OA (S$)</span><span class="row-value">${fmt(funds.cpfInvested)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Total CPF-OA available</span><span class="row-value">${fmt(funds.cpfTotal)}</span></div>
+      <div class="breakdown-row"><span class="row-label">CPF-OA used for purchase</span><span class="row-value deduct">− ${fmt(cpfUsed)}</span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total CPF-OA (S$)</strong></span><span class="row-value ${excessTotalCpf >= 0 ? '' : 'deduct'}"><strong>${excessTotalCpf >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCpf))}</strong></span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total CPF-OA after Invested (S$)</strong></span><span class="row-value ${excessCpfAfterInvested >= 0 ? '' : 'deduct'}"><strong>${excessCpfAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCpfAfterInvested))}</strong></span></div>
+      ${needCashFromInvested > 0 ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">⚠️ Purchase cash needs ${fmt(needCashFromInvested)} from your <strong>Invested Cash Portfolio</strong> (liquid cash alone is not enough).</div>` : ''}
+      ${needCpfFromInvested > 0 ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">⚠️ Purchase CPF-OA needs ${fmt(needCpfFromInvested)} from your <strong>Invested CPF-OA</strong> (e.g. redeem CPFIS).</div>` : ''}
+      ${(excessCashAfterInvested >= 0 && excessCpfAfterInvested >= 0 && (funds.cashTotal + funds.cpfTotal) > 0) ? `<div class="note-row" style="color:#1B7A4B;background:#E6F5EE">✅ Liquid funds cover the purchase without touching invested portfolios. Invested cash ${fmt(funds.cashInvested)} and invested CPF-OA ${fmt(funds.cpfInvested)} can stay invested.</div>` : ''}
+    </div>
+
+    <div class="breakdown-section">
       <div class="breakdown-head">📊 All Taxes &amp; Duties Summary</div>
       <div class="breakdown-row"><span class="row-label">Seller's Stamp Duty (SSD)</span><span class="row-value ${ssd>0?'deduct':'zero'}">${ssd>0?fmt(ssd):'Nil'}</span></div>
       <div class="breakdown-row"><span class="row-label">Buyer's Stamp Duty (BSD)</span><span class="row-value">${fmt(bsd)}</span></div>
@@ -2773,7 +2888,7 @@ document.getElementById('sell-ssd-era').addEventListener('change', function() {
 // ─── PERSISTENCE & SCENARIO MANAGER ──────────────────────────────
 const SCENARIOS_KEY = 'sg_prop_scenarios_v1';
 const CURRENT_KEY   = 'sg_prop_current_v1';
-const APP_VERSION   = '2026.08.17';
+const APP_VERSION   = '2026.08.17c';
 
 const FIELDS = [
   { id: 'link-sell-to-buy', type: 'checkbox' },
@@ -2804,7 +2919,9 @@ const FIELDS = [
   { id: 'buy-insurance',   type: 'number' },
   { id: 'buy-reno',        type: 'number' },
   { id: 'buy-cpf-avail',   type: 'number' },
+  { id: 'buy-cpf-invested', type: 'number' },
   { id: 'buy-cash-avail',  type: 'number' },
+  { id: 'buy-cash-invested', type: 'number' },
   { id: 'buy-citizenship', type: 'select' },
   { id: 'bridging',        type: 'number' },
   { id: 'seq',             type: 'select' },
