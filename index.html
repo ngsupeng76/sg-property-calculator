@@ -151,7 +151,7 @@
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
-  input[type="number"], input[type="text"].money-input, select {
+  input[type="number"], input[type="text"].money-input, input[type="text"].percent-input, select {
     width: 100%;
     padding: 11px 14px;
     border: 1.5px solid var(--border);
@@ -165,7 +165,7 @@
   }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  input[type="number"]:focus, input[type="text"].money-input:focus, select:focus {
+  input[type="number"]:focus, input[type="text"].money-input:focus, input[type="text"].percent-input:focus, select:focus {
     outline: none;
     border-color: var(--red);
   }
@@ -983,7 +983,7 @@
 
       <div class="field">
         <label>Agent Commission Rate (%)</label>
-        <input type="number" id="sell-commission" placeholder="2" value="2" step="0.1" min="0" max="5">
+        <input type="text" inputmode="decimal" class="percent-input" id="sell-commission" placeholder="2.00" value="2.00">
       </div>
       <div class="hint" style="margin-top:-8px">HDB typically 1–2%. Private typically 2–4%. Buyer's agent (if you pay): additional 0.5–1%.</div>
 
@@ -1116,7 +1116,7 @@
 
         <div class="field">
           <label>Interest Rate (% p.a.) <span id="rate-type-label" style="font-weight:400;color:var(--ink-muted);font-size:0.78rem"></span></label>
-          <input type="number" id="buy-rate" placeholder="1.5" value="1.5" step="0.05" min="0.5" max="10" oninput="refreshAffordability()">
+          <input type="text" inputmode="decimal" class="percent-input" id="buy-rate" placeholder="1.50" value="1.50" oninput="refreshAffordability()">
           <div id="rate-hint" style="margin-top:5px;font-size:0.76rem;color:var(--ink-muted)"></div>
         </div>
 
@@ -1132,7 +1132,7 @@
 
       <div class="field">
         <label>Buyer's Agent Commission (%)</label>
-        <input type="number" id="buy-commission" placeholder="1" value="1" step="0.1" min="0" max="3">
+        <input type="text" inputmode="decimal" class="percent-input" id="buy-commission" placeholder="1.00" value="1.00">
       </div>
       <div class="hint" style="margin-top:-8px">HDB: typically 1%. Private: often 0 (co-broking) or 0.5–1% under new SEAA guidelines. Set to 0 if seller pays all.</div>
 
@@ -1345,6 +1345,38 @@ function initCurrencyInputs() {
     if (el.value !== '' && el.value != null) el.value = formatMoneyInput(el.value);
   });
 }
+
+function formatPercentInput(v) {
+  const n = typeof v === 'number' ? v : parseMoney(v);
+  if (!Number.isFinite(n)) return '0.00';
+  return (Math.round(n * 100) / 100).toFixed(2);
+}
+const PERCENT_FIELD_IDS = new Set(['sell-commission','buy-commission','buy-rate']);
+function setPercentField(idOrEl, value) {
+  const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+  if (!el) return;
+  el.value = formatPercentInput(value);
+}
+function initPercentInputs() {
+  PERCENT_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('percent-input');
+    el.setAttribute('inputmode', 'decimal');
+    el.addEventListener('focus', () => {
+      if (el.readOnly) return;
+      const n = parseMoney(el.value);
+      el.value = (el.value.trim() === '' && n === 0) ? '' : String(n);
+      try { el.select(); } catch (e) {}
+    });
+    el.addEventListener('blur', () => {
+      el.value = formatPercentInput(el.value === '' ? 0 : el.value);
+    });
+    if (el.value !== '' && el.value != null) el.value = formatPercentInput(el.value);
+  });
+}
+
+
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2192,17 +2224,15 @@ function updateLoanRules() {
   const rateLabel = document.getElementById('rate-type-label');
 
   if (loanType === 'bank') {
-    rateInput.value = 1.5;
-    rateInput.step  = '0.05';
+    rateInput.value = formatPercentInput(1.5);
     rateLabel.textContent = '— bank loan (fixed/floating)';
     rateHint.innerHTML = 'Fixed: 1.40%–1.80% | Floating (SORA): 1.02%–1.60% as of Apr 2026. Use a blended estimate for long-term planning.';
   } else if (loanType === 'hdb') {
-    rateInput.value = 2.6;
-    rateInput.step  = '0.1';
+    rateInput.value = formatPercentInput(2.6);
     rateLabel.textContent = '— HDB concessionary (locked)';
     rateHint.innerHTML = 'HDB rate is pegged at CPF OA + 0.1% = <strong>2.60% p.a.</strong> Fixed since 2004. Adjust only if projecting future changes.';
   } else {
-    rateInput.value = 0;
+    rateInput.value = formatPercentInput(0);
     rateLabel.textContent = '';
     rateHint.innerHTML = '';
   }
@@ -2263,7 +2293,7 @@ function refreshAffordability() {
   const loanAmt  = numVal('buy-loan');
   const income   = numVal('buy-income');
   const debt     = numVal('buy-debt');
-  const rate     = parseFloat(document.getElementById('buy-rate').value) || 1.5;
+  const rate     = numVal('buy-rate') || 1.5;
   const tenure   = parseInt(document.getElementById('buy-tenure').value) || 25;
   const buyType  = document.querySelector('input[name="buy-type"]:checked').value;
   const isHdbEc  = buyType === 'hdb';
@@ -2433,7 +2463,7 @@ function calcBuy() {
   const lease       = parseInt(document.getElementById('buy-lease')?.value) || 99;
   const income      = numVal('buy-income');
   const existDebt   = numVal('buy-debt');
-  const intRate     = parseFloat(document.getElementById('buy-rate')?.value) || 3.5;
+  const intRate     = numVal('buy-rate') || 3.5;
   const valuation   = numVal('buy-valuation');
   const commRate    = numVal('buy-commission');
   const legal       = numVal('buy-legal');
@@ -3048,6 +3078,7 @@ function captureSnapshot() {
     if (!el) return;
     if (type === 'checkbox') data[id] = el.checked;
     else if (CURRENCY_FIELD_IDS.has(id)) data[id] = String(parseMoney(el.value));
+    else if (PERCENT_FIELD_IDS.has(id)) data[id] = String(parseMoney(el.value));
     else data[id] = el.value;
   });
   RADIO_GROUPS.forEach(name => {
@@ -3072,6 +3103,7 @@ function applySnapshot(data) {
     if (!el || data[id] === undefined) return;
     if (type === 'checkbox') el.checked = !!data[id];
     else if (CURRENCY_FIELD_IDS.has(id)) el.value = formatMoneyInput(data[id]);
+    else if (PERCENT_FIELD_IDS.has(id)) el.value = formatPercentInput(data[id]);
     else el.value = data[id];
   });
   RADIO_GROUPS.forEach(name => {
@@ -3152,6 +3184,7 @@ function newScenario() {
     if (type === 'checkbox') el.checked = false;
     else if (type === 'select') el.selectedIndex = 0;
     else if (CURRENCY_FIELD_IDS.has(id)) el.value = formatMoneyInput(0);
+    else if (PERCENT_FIELD_IDS.has(id)) el.value = formatPercentInput(0);
     else el.value = '';
   });
   RADIO_GROUPS.forEach(name => {
@@ -3721,6 +3754,7 @@ function showToast(msg) {
 
 window.addEventListener('DOMContentLoaded', function() {
   initCurrencyInputs();
+  initPercentInputs();
   updateStorageUI();
   const fromShare = tryLoadSharedFromHash();
   if (!fromShare) {
