@@ -2792,7 +2792,7 @@ function calcCombined() {
           ${ssd>0?`<div class="breakdown-row"><span class="row-label">SSD</span><span class="row-value deduct">− ${fmt(ssd)}</span></div>`:''}
           ${lockInPenalty>0?`<div class="breakdown-row"><span class="row-label">Lock-in Penalty</span><span class="row-value deduct">− ${fmt(lockInPenalty)}</span></div>`:''}
           ${levy>0?`<div class="breakdown-row"><span class="row-label">Resale Levy</span><span class="row-value deduct">− ${fmt(levy)}</span></div>`:''}
-          <div class="breakdown-row"><span class="row-label">Other (tax, misc)</span><span class="row-value deduct">− ${fmt(misc+redemption)}</span></div>
+          <div class="breakdown-row"><span class="row-label">Other (Tax, Misc)</span><span class="row-value deduct">− ${fmt(misc+redemption)}</span></div>
           <div class="breakdown-total"><span>Net Cash from Sale</span><span>${fmt(netCash)}</span></div>
         </div>
       </div>
@@ -2801,7 +2801,7 @@ function calcCombined() {
         <h3>🔑 Buying Side</h3>
         <div class="breakdown-section">
           <div class="breakdown-row"><span class="row-label">Purchase Price</span><span class="row-value">${fmt(buyPrice)}</span></div>
-          <div class="breakdown-row"><span class="row-label">Downpayment (excl. loan)</span><span class="row-value">${fmt(downpayment)}</span></div>
+          <div class="breakdown-row"><span class="row-label">Downpayment (Excl. Loan)</span><span class="row-value">${fmt(downpayment)}</span></div>
           <div class="breakdown-row"><span class="row-label">BSD</span><span class="row-value">${fmt(bsd)}</span></div>
           <div class="breakdown-row"><span class="row-label">ABSD</span><span class="row-value ${absd>0?'deduct':'zero'}">${absd>0?fmt(absd):'Nil'}</span></div>
           <div class="breakdown-row"><span class="row-label">Legal + Valuation</span><span class="row-value">${fmt(buyLegal+buyValuation)}</span></div>
@@ -2816,55 +2816,54 @@ function calcCombined() {
 
     <div class="net-highlight">
       <div>
-        <div class="label">NET POSITION (Sale Proceeds minus Buy Costs)</div>
-        <div class="sum-note" style="opacity:0.6;margin-top:4px">Positive = surplus cash; Negative = additional cash needed</div>
+        <div class="label">Net Position (Sale Proceeds Minus Buy Costs)</div>
+        <div class="sum-note" style="opacity:0.6;margin-top:4px">Positive = Surplus Cash; Negative = Additional Cash Needed</div>
       </div>
       <div class="amount">${cashSurplus - bridgingAdj >= 0 ? '+' : '−'}${fmt(Math.abs(cashSurplus - bridgingAdj))}</div>
     </div>
 
     <div class="breakdown-section">
       <div class="breakdown-head">💵🏦 Remaining Funds After Purchase</div>
-      <div class="note-row">Aligned with the Buying tab <strong>max CPF-OA usage</strong> split. “After Invested” = excess remaining once Invested Cash Portfolio / Invested CPF-OA are set aside (liquid residual if you do not liquidate investments).</div>
+      <div class="note-row">Aligned with the Buying tab <strong>max CPF-OA usage</strong> split. "Excluding Invested" = excess remaining once Invested Cash Portfolio / Invested CPF-OA Portfolio are set aside (liquid residual if you do not liquidate investments).</div>
       <div class="summary-strip" style="margin-top:8px">
         <div class="sum-card" style="border-left:4px solid #1B4B7A">
           <div class="sum-label" style="color:#1B4B7A">💵 Excess Total Cash</div>
           <div class="sum-value" style="color:${excessTotalCash >= 0 ? '#1B4B7A' : '#C8102E'}">${excessTotalCash >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCash))}</div>
-          <div class="sum-note">Total cash ${fmt(funds.cashTotal)} − used ${fmt(cashUsed)}</div>
+          <div class="sum-note">Total Cash Available ${fmt(funds.cashTotal)} − Cash Used ${fmt(cashUsed)}</div>
         </div>
         <div class="sum-card" style="border-left:4px solid #3D6FA8">
-          <div class="sum-label" style="color:#1B4B7A">Excess Total Cash after Invested</div>
+          <div class="sum-label" style="color:#1B4B7A">Excess Total Cash excluding Invested Cash Portfolio</div>
           <div class="sum-value" style="color:${excessCashAfterInvested >= 0 ? '#1B4B7A' : '#C8102E'}">${excessCashAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCashAfterInvested))}</div>
-          <div class="sum-note">After deducting invested cash ${fmt(funds.cashInvested)}</div>
+          <div class="sum-note">After deducting Invested Cash Portfolio ${fmt(funds.cashInvested)}</div>
         </div>
         <div class="sum-card" style="border-left:4px solid #1B7A4B">
           <div class="sum-label" style="color:#1B7A4B">🏦 Excess Total CPF-OA</div>
           <div class="sum-value" style="color:${excessTotalCpf >= 0 ? '#1B7A4B' : '#C8102E'}">${excessTotalCpf >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCpf))}</div>
-          <div class="sum-note">Total CPF-OA ${fmt(funds.cpfTotal)} − used ${fmt(cpfUsed)}</div>
+          <div class="sum-note">Total CPF-OA Available ${fmt(funds.cpfTotal)} − CPF-OA Used ${fmt(cpfUsed)}</div>
         </div>
         <div class="sum-card" style="border-left:4px solid #2E9B63">
-          <div class="sum-label" style="color:#1B7A4B">Excess Total CPF-OA after Invested</div>
+          <div class="sum-label" style="color:#1B7A4B">Excess Total CPF-OA excluding Invested CPF-OA Portfolio</div>
           <div class="sum-value" style="color:${excessCpfAfterInvested >= 0 ? '#1B7A4B' : '#C8102E'}">${excessCpfAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCpfAfterInvested))}</div>
-          <div class="sum-note">After deducting invested CPF-OA ${fmt(funds.cpfInvested)}</div>
+          <div class="sum-note">After deducting Invested CPF-OA Portfolio ${fmt(funds.cpfInvested)}</div>
         </div>
       </div>
-      <div class="breakdown-row"><span class="row-label">Cash available (liquid)</span><span class="row-value">${fmt(funds.cashLiquid)}</span></div>
-      <div class="breakdown-row"><span class="row-label">Invested Cash Portfolio (S$)</span><span class="row-value">${fmt(funds.cashInvested)}</span></div>
-      <div class="breakdown-row"><span class="row-label">Total cash available</span><span class="row-value">${fmt(funds.cashTotal)}</span></div>
-      <div class="breakdown-row"><span class="row-label">Cash used for purchase${bridgingAdj > 0 ? ' (incl. bridging)' : ''}</span><span class="row-value deduct">− ${fmt(cashUsed)}</span></div>
-      <div class="breakdown-row"><span class="row-label"><strong>Excess Total Cash (S$)</strong></span><span class="row-value ${excessTotalCash >= 0 ? '' : 'deduct'}"><strong>${excessTotalCash >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCash))}</strong></span></div>
-      <div class="breakdown-row"><span class="row-label"><strong>Excess Total Cash after Invested Portfolio (S$)</strong></span><span class="row-value ${excessCashAfterInvested >= 0 ? '' : 'deduct'}"><strong>${excessCashAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCashAfterInvested))}</strong></span></div>
-      <div class="breakdown-row" style="margin-top:6px"><span class="row-label">CPF-OA available (liquid)</span><span class="row-value">${fmt(funds.cpfLiquid)}</span></div>
-      <div class="breakdown-row"><span class="row-label">Invested CPF-OA (S$)</span><span class="row-value">${fmt(funds.cpfInvested)}</span></div>
-      <div class="breakdown-row"><span class="row-label">Total CPF-OA available</span><span class="row-value">${fmt(funds.cpfTotal)}</span></div>
-      <div class="breakdown-row"><span class="row-label">CPF-OA used for purchase</span><span class="row-value deduct">− ${fmt(cpfUsed)}</span></div>
-      <div class="breakdown-row"><span class="row-label"><strong>Excess Total CPF-OA (S$)</strong></span><span class="row-value ${excessTotalCpf >= 0 ? '' : 'deduct'}"><strong>${excessTotalCpf >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCpf))}</strong></span></div>
-      <div class="breakdown-row"><span class="row-label"><strong>Excess Total CPF-OA after Invested (S$)</strong></span><span class="row-value ${excessCpfAfterInvested >= 0 ? '' : 'deduct'}"><strong>${excessCpfAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCpfAfterInvested))}</strong></span></div>
-      ${needCashFromInvested > 0 ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">⚠️ Purchase cash needs ${fmt(needCashFromInvested)} from your <strong>Invested Cash Portfolio</strong> (liquid cash alone is not enough).</div>` : ''}
-      ${needCpfFromInvested > 0 ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">⚠️ Purchase CPF-OA needs ${fmt(needCpfFromInvested)} from your <strong>Invested CPF-OA</strong> (e.g. redeem CPFIS).</div>` : ''}
-      ${(excessCashAfterInvested >= 0 && excessCpfAfterInvested >= 0 && (funds.cashTotal + funds.cpfTotal) > 0) ? `<div class="note-row" style="color:#1B7A4B;background:#E6F5EE">✅ Liquid funds cover the purchase without touching invested portfolios. Invested cash ${fmt(funds.cashInvested)} and invested CPF-OA ${fmt(funds.cpfInvested)} can stay invested.</div>` : ''}
+      <div class="breakdown-row"><span class="row-label">Available Cash</span><span class="row-value">${fmt(funds.cashLiquid)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Invested Cash Portfolio</span><span class="row-value">${fmt(funds.cashInvested)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Total Cash Available</span><span class="row-value">${fmt(funds.cashTotal)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Cash Used for Purchase${bridgingAdj > 0 ? ' (Incl. Bridging)' : ''}</span><span class="row-value deduct">− ${fmt(cashUsed)}</span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total Cash</strong></span><span class="row-value ${excessTotalCash >= 0 ? '' : 'deduct'}"><strong>${excessTotalCash >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCash))}</strong></span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total Cash excluding Invested Cash Portfolio</strong></span><span class="row-value ${excessCashAfterInvested >= 0 ? '' : 'deduct'}"><strong>${excessCashAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCashAfterInvested))}</strong></span></div>
+      <div class="breakdown-row" style="margin-top:6px"><span class="row-label">Available CPF-OA</span><span class="row-value">${fmt(funds.cpfLiquid)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Invested CPF-OA Portfolio</span><span class="row-value">${fmt(funds.cpfInvested)}</span></div>
+      <div class="breakdown-row"><span class="row-label">Total CPF-OA Available</span><span class="row-value">${fmt(funds.cpfTotal)}</span></div>
+      <div class="breakdown-row"><span class="row-label">CPF-OA Used for Purchase</span><span class="row-value deduct">− ${fmt(cpfUsed)}</span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total CPF-OA</strong></span><span class="row-value ${excessTotalCpf >= 0 ? '' : 'deduct'}"><strong>${excessTotalCpf >= 0 ? '' : '−'}${fmt(Math.abs(excessTotalCpf))}</strong></span></div>
+      <div class="breakdown-row"><span class="row-label"><strong>Excess Total CPF-OA excluding Invested CPF-OA Portfolio</strong></span><span class="row-value ${excessCpfAfterInvested >= 0 ? '' : 'deduct'}"><strong>${excessCpfAfterInvested >= 0 ? '' : '−'}${fmt(Math.abs(excessCpfAfterInvested))}</strong></span></div>
+      ${needCashFromInvested > 0 ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">⚠️ Purchase cash needs ${fmt(needCashFromInvested)} from your <strong>Invested Cash Portfolio</strong> (Available Cash alone is not enough).</div>` : ''}
+      ${needCpfFromInvested > 0 ? `<div class="note-row" style="color:#7A0020;background:#FFF5F7">⚠️ Purchase CPF-OA needs ${fmt(needCpfFromInvested)} from your <strong>Invested CPF-OA Portfolio</strong> (e.g. redeem CPFIS).</div>` : ''}
+      ${(excessCashAfterInvested >= 0 && excessCpfAfterInvested >= 0 && (funds.cashTotal + funds.cpfTotal) > 0) ? `<div class="note-row" style="color:#1B7A4B;background:#E6F5EE">✅ Available Cash and Available CPF-OA cover the purchase without touching invested portfolios. Invested Cash Portfolio ${fmt(funds.cashInvested)} and Invested CPF-OA Portfolio ${fmt(funds.cpfInvested)} can stay invested.</div>` : ''}
     </div>
 
-    <div class="breakdown-section">
       <div class="breakdown-head">📊 All Taxes &amp; Duties Summary</div>
       <div class="breakdown-row"><span class="row-label">Seller's Stamp Duty (SSD)</span><span class="row-value ${ssd>0?'deduct':'zero'}">${ssd>0?fmt(ssd):'Nil'}</span></div>
       <div class="breakdown-row"><span class="row-label">Buyer's Stamp Duty (BSD)</span><span class="row-value">${fmt(bsd)}</span></div>
